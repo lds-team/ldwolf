@@ -1,0 +1,8 @@
+<resources>
+<!--Defaultscreenmargins,pertheAndroidDesignguidelines.-->
+<dimen name="activity_horizontal_margin">24dp</dimen>
+<dimen name="activity_vertical_margin">24dp</dimen>
+<dimen name="thumb_size">24dp</dimen>
+<dimen name="thumb_text_size">15dp</dimen>
+<dimen name="dp50">204dp</dimen>
+</resources>

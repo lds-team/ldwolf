@@ -1,0 +1,29 @@
+package bingo.com;
+
+import bingo.com.base.BaseBingoApp;
+import bingo.com.helperdb.CongnoDBHelper;
+import bingo.com.helperdb.ContactDBHelper;
+import bingo.com.helperdb.FollowDBHelper;
+import bingo.com.helperdb.MessageDBHelper;
+import bingo.com.helperdb.TempleMessageHelper;
+
+/**
+ * Created by kazinguyen on 6/17/17.
+ */
+public class BingoApp extends BaseBingoApp {
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+
+        init();
+    }
+
+    private void init() {
+        ContactDBHelper.init(getApplicationContext());
+        MessageDBHelper.init(getApplicationContext());
+        FollowDBHelper.init(getApplicationContext());
+        TempleMessageHelper.init(getApplicationContext());
+        CongnoDBHelper.init(getApplicationContext());
+    }
+}

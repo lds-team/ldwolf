@@ -1,0 +1,364 @@
+package bingo.com.dialog;
+
+import android.content.ClipData;
+import android.content.ClipboardManager;
+import android.content.Context;
+import android.content.Intent;
+import android.database.Cursor;
+import android.net.Uri;
+import android.text.TextUtils;
+import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.LinearLayout;
+import android.widget.RadioGroup;
+import android.widget.RelativeLayout;
+import android.widget.SimpleCursorAdapter;
+import android.widget.Spinner;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import bingo.com.R;
+import bingo.com.async.CommonTask;
+import bingo.com.base.BaseActivity;
+import bingo.com.base.baseview.BaseDialog;
+import bingo.com.enumtype.LotoType;
+import bingo.com.enumtype.TypeMessage;
+import bingo.com.helperdb.ContactColumnMaps;
+import bingo.com.helperdb.ContactDBHelper;
+import bingo.com.helperdb.FollowDBHelper;
+import bingo.com.helperdb.MessageDBHelper;
+import bingo.com.helperdb.db.ContactDatabase;
+import bingo.com.helperdb.db.FollowDatabase;
+import bingo.com.helperdb.db.MessageDatabase;
+import bingo.com.model.ChooseMessage;
+import bingo.com.model.MessageForm;
+import bingo.com.model.ResultReturnModel;
+import bingo.com.utils.Keysaved;
+import bingo.com.utils.StatisticControlImport;
+import bingo.com.utils.Utils;
+import butterknife.Bind;
+import butterknife.OnClick;
+import butterknife.OnItemSelected;
+
+/**
+ * Created by kazinguyen on 6/24/17.
+ */
+public class XuatSoDialog extends BaseDialog implements View.OnClickListener {
+
+    public static int TYPE_XUAT_SO = 0;
+    public static int TYPE_XUAT_TIN_NHAN = 1;
+
+    private int type = TYPE_XUAT_SO;
+
+    @Bind(R.id.xuatso_relativespin)
+    RelativeLayout topRelative;
+
+    @Bind(R.id.xuatso_linearbtm)
+    LinearLayout btmXuatso;
+
+    @Bind(R.id.xuatso_xuatnhan)
+    Button btmTinnhan;
+
+    @Bind(R.id.xuatso_edittext)
+    EditText editText;
+
+    @Bind(R.id.xuatso_radiogroup)
+    RadioGroup group;
+
+    @Bind(R.id.xuatso_radiogroup2)
+    RadioGroup groupType;
+
+    @Bind(R.id.xuatso_spin)
+    Spinner listCustomer;
+
+    @Bind(R.id.xuatso_infocustomer)
+    TextView customer;
+
+    private Context context;
+
+    private LotoType xuatType;
+
+    public XuatSoDialog(Context context, boolean notCancel, int type) {
+        super(context, notCancel);
+
+        this.context = context;
+        this.type = type;
+        this.xuatType = LotoType.de;
+
+        initListContact();
+
+        setType(type);
+    }
+
+    private void initListContact() {
+
+        SimpleCursorAdapter adapter = new SimpleCursorAdapter(
+                context,
+                android.R.layout.simple_spinner_dropdown_item,
+                ContactDBHelper.getAllsChuNhanSo(),
+                new String[]{ContactDatabase.NAME},
+                new int[]{android.R.id.text1}, 0);
+
+        listCustomer.setAdapter(adapter);
+        listCustomer.setDropDownVerticalOffset(120);
+        listCustomer.setSelection(0);
+        listCustomer.setSelected(true);
+    }
+
+    @Override
+    public int layout() {
+        return R.layout.dialog_dan_xuatso;
+    }
+
+    public void setType(int type) {
+        this.type = type;
+
+        if (type == TYPE_XUAT_SO)
+        {
+            group.check(R.id.xuatso_typexuatso);
+            groupType.check(R.id.xuatso_xuatde);
+            topRelative.setVisibility(View.VISIBLE);
+            btmXuatso.setVisibility(View.VISIBLE);
+            btmTinnhan.setVisibility(View.GONE);
+            editText.setVisibility(View.VISIBLE);
+        }
+        else
+        {
+            group.check(R.id.xuatso_typetinnhan);
+            groupType.check(R.id.xuatso_xuatde);
+            topRelative.setVisibility(View.VISIBLE);
+            btmXuatso.setVisibility(View.GONE);
+            btmTinnhan.setVisibility(View.VISIBLE);
+            editText.setVisibility(View.GONE);
+        }
+    }
+
+    @Override
+    public void dismissed() {
+
+    }
+
+    @OnClick({R.id.xuatso_typexuatso, R.id.xuatso_typetinnhan, R.id.xuatso_xuatde, R.id.xuatso_xuatlo, R.id.xuatso_xuatxien})
+    @Override
+    public void onClick(View v) {
+        switch (v.getId())
+        {
+            case R.id.xuatso_typexuatso:
+                setType(TYPE_XUAT_SO);
+                break;
+
+            case R.id.xuatso_typetinnhan:
+                setType(TYPE_XUAT_TIN_NHAN);
+                break;
+
+            case R.id.xuatso_xuatde:
+                xuatType = LotoType.de;
+                break;
+
+            case R.id.xuatso_xuatlo:
+                xuatType = LotoType.lo;
+                break;
+
+            case R.id.xuatso_xuatxien:
+                xuatType = LotoType.xien;
+                break;
+
+            case R.id.xuatso_xuatbacang:
+                xuatType = LotoType.bacang;
+                break;
+
+            default:break;
+        }
+    }
+
+    @OnClick({R.id.xuatso_xuatdan, R.id.xuatso_xuatnhan})
+    public void onButtonClick(View v) {
+        String phone = null;
+        String name = null;
+
+        if (listCustomer.getSelectedItem() != null)
+        {
+            phone = ((Cursor) listCustomer.getSelectedItem()).getString(ContactColumnMaps.PHONE);
+            name = ((Cursor) listCustomer.getSelectedItem()).getString(ContactColumnMaps.NAME);
+        }
+
+        String mes = getMessage();
+
+        switch (v.getId())
+        {
+            case R.id.xuatso_xuatdan:
+                extractClipboard(mes);
+                editText.setText(mes);
+                break;
+
+            case R.id.xuatso_xuatnhan:
+                extractMessage(phone, mes);
+                dismiss();
+                break;
+
+            default:break;
+        }
+
+        if (!TextUtils.isEmpty(mes))
+        {
+            importToDb(name, phone, mes);
+        }
+    }
+
+    public void importToDb(final String name, final String phone, final String mes) {
+
+        final ResultReturnModel[] result = StatisticControlImport.getResultTodayAndYesterday(context);
+
+        CommonTask.AsyncSingleThread.get().execute(new Runnable() {
+            @Override
+            public void run() {
+                if (phone != null)
+                {
+                    String time = Utils.getTimeWithCurrentConfigDate();
+
+                    //Import to messageDB.
+                    MessageDBHelper.addMessageSent(new ChooseMessage(
+                            name,
+                            phone,
+                            time,
+                            mes,
+                            TypeMessage.SENT.name()
+                    ));
+
+                    //Import Direct To FollowDB.
+                    StatisticControlImport.importKeep(name, phone, time, mes, result, TypeMessage.SENT);
+
+                    if (context instanceof BaseActivity)
+                    {
+                        ((BaseActivity) context).runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                requestUpdate();
+
+                                Toast.makeText(context, "Xuất tin nhắn thành công.", Toast.LENGTH_LONG).show();
+                            }
+                        });
+                    }
+                }
+                else
+                {
+                    ((BaseActivity) context).runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast.makeText(context, "Lỗi! Chưa chọn chủ nhận số.", Toast.LENGTH_LONG).show();
+                        }
+                    });
+                }
+            }
+        }).clean();
+    }
+
+    public void extractClipboard(String mes) {
+
+        saveToClipboard(mes);
+    }
+
+    public void extractMessage(String phone, String mes) {
+        if (phone != null && !TextUtils.isEmpty(mes))
+        {
+            Intent sendIntent = new Intent(Intent.ACTION_VIEW);
+            sendIntent.putExtra("sms_body", mes);
+            sendIntent.setData(Uri.parse("sms:" + phone));
+            context.startActivity(sendIntent);
+        }
+
+        if (phone == null)
+        {
+            Toast.makeText(context, "Không có chủ nhận số.", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    @Deprecated
+    @SuppressWarnings("Has Bug")
+    private String getMessageFrom(String phone) {
+        Cursor cursor;
+
+        cursor = FollowDBHelper.getNumberForXuatSo(xuatType);
+
+        if (cursor != null)
+        {
+            try {
+
+                int colParentType = cursor.getColumnIndex(FollowDatabase.DETAIL_PARENT_TYPE);
+                int colType = cursor.getColumnIndex(FollowDatabase.DETAIL_TYPE);
+                int colNum = cursor.getColumnIndex(FollowDatabase.DETAIL_NUMBER);
+                int colMoney = cursor.getColumnIndex("sum");
+                int colKeep = cursor.getColumnIndex("keep");
+                int colSent = cursor.getColumnIndex("deliver");
+
+                MessageForm from = new MessageForm.Builder(cursor,
+                        colParentType,
+                        colType,
+                        colNum,
+                        colMoney,
+                        colKeep,
+                        colSent
+                ).build();
+
+                return from.getMessage();
+
+            } finally {
+                cursor.close();
+            }
+        }
+
+        return "";
+    }
+
+    private String getMessage() {
+        Cursor cursor;
+
+        cursor = FollowDBHelper.getNumberForXuatSo(xuatType);
+
+        if (cursor != null)
+        {
+            try {
+
+                int colParentType = cursor.getColumnIndex(FollowDatabase.DETAIL_PARENT_TYPE);
+                int colType = cursor.getColumnIndex(FollowDatabase.DETAIL_TYPE);
+                int colNum = cursor.getColumnIndex(FollowDatabase.DETAIL_NUMBER);
+
+                MessageForm from = new MessageForm.Builder(cursor,
+                        colParentType,
+                        colType,
+                        colNum
+                ).build();
+
+                return from.getMessage();
+
+            } finally {
+                cursor.close();
+            }
+        }
+
+        return "";
+    }
+
+    private void saveToClipboard(String text) {
+        ClipboardManager manager = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
+        ClipData data = ClipData.newPlainText(Keysaved.CLIPBOARD_BINGO, text);
+        manager.setPrimaryClip(data);
+    }
+
+    @OnItemSelected(R.id.xuatso_spin)
+    public void changeCustomer() {
+
+        if (listCustomer.getSelectedItem() instanceof Cursor)
+        {
+            Cursor c = ((Cursor) listCustomer.getSelectedItem());
+
+            String phone = c.getString(c.getColumnIndex(MessageDatabase.PHONE));
+
+            String name = c.getString(c.getColumnIndex(MessageDatabase.NAME));
+
+            customer.setText(name.concat(": ").concat(phone));
+
+        }
+    }
+}

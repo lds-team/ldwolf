@@ -1,0 +1,227 @@
+package bingo.com.utils;
+
+import android.text.TextUtils;
+
+import com.bingo.analyze.Analyze;
+import com.bingo.analyze.AnalyzeSMSNew;
+import com.bingo.analyze.calculation.BingoCalc;
+
+import java.math.MathContext;
+import java.math.RoundingMode;
+
+import bingo.com.enumtype.LotoType;
+import bingo.com.enumtype.TypeMessage;
+import bingo.com.helperdb.FollowDBHelper;
+import bingo.com.helperdb.MessageDBHelper;
+import bingo.com.model.ContactModel;
+import bingo.com.model.FollowModel;
+
+/**
+ * Created by kazinguyen on 8/5/17.
+ */
+public class CalculateResult {
+
+    public String todayBingoResult;
+
+    private AnalyzeSMSNew analyzeSMS;
+
+    private ContactModel config;
+
+    private String lastType = null;
+
+    private long lastCost = 0;
+
+    private boolean changed;
+
+    public CalculateResult(String todayBingoResult) {
+        this.todayBingoResult = todayBingoResult;
+
+        analyzeSMS = new AnalyzeSMSNew();
+        analyzeSMS.setResult(todayBingoResult);
+    }
+
+    public void setPhone(String phone) {
+        config = LoaderSQLite.getConfigParameter(phone);
+
+        BingoCalc.HS_DE = config.getDITDB() / 1000d;
+        BingoCalc.HS_LO = config.getLO() / 1000d;
+        BingoCalc.HS_XIEN_2 = config.getXIEN2() / 1000d;
+        BingoCalc.HS_XIEN_3 = config.getXIEN3() / 1000d;
+        BingoCalc.HS_XIEN_4 = config.getXIEN4() / 1000d;
+
+        BingoCalc.HS_THANG_DE = (int) (config.getDITDB_LANAN() / 1000d);
+        BingoCalc.HS_THANG_LO = (int) (config.getLO_LANAN() / 1000d);
+        BingoCalc.HS_THANG_XIEN_2 = (int) (config.getXIEN2_LANAN() / 1000d);
+        BingoCalc.HS_THANG_XIEN_3 = (int) (config.getXIEN3_LANAN() / 1000d);
+        BingoCalc.HS_THANG_XIEN_4 = (int) (config.getXIEN4_LANAN() / 1000d);
+
+        changed = true;
+    }
+
+    public void calculateNumber(String number, String type, String price, String unit, String time, TypeMessage messageType, boolean isLast) {
+
+        if (config != null)
+        {
+            int fPrice = (int) Double.parseDouble(price);
+
+            Analyze analyze = analyzeSMS.getAnalyze(number, type, String.valueOf(fPrice), unit, todayBingoResult);
+
+            FollowModel model = getaPartOfFlowModel(analyze, number, type, price, unit, time, messageType);
+
+            FollowDBHelper.updateResultForNumber(model);
+
+            /*if (messageType != TypeMessage.KEEP && !TextUtils.isEmpty(analyze.winNumber))
+            {
+                MessageDBHelper.updateWinNumberSyntax(config.getPhone(), time, type.concat(" ").concat(analyze.winNumber));
+            }*/
+
+            if (messageType != TypeMessage.KEEP)
+            {
+                String message = "";
+
+                if (changed)
+                {
+                    lastType = null;
+                    lastCost = 0;
+                    changed = false;
+                }
+
+                String mergeType = type.contains("xien") ? "xien" : type;
+
+                boolean firstType = (lastType == null);
+
+                boolean typeChanged = (lastType != null && !lastType.equals(mergeType));
+
+                boolean priceChanged = (lastCost != Long.parseLong(price) && lastCost != 0);
+
+                boolean hasWin = !TextUtils.isEmpty(analyze.winNumber);
+
+                unit = firstType ? (mergeType.equals(LotoType.lo.name()) ? "d" : "n") : (lastType.equals(LotoType.lo.name()) ? "d" : "n");
+
+                if ((typeChanged || priceChanged))
+                {
+                    message = message.concat("x").concat(String.valueOf(lastCost)).concat(unit).concat("<br>");
+                }
+
+                if (typeChanged || firstType)
+                {
+                    message = message.concat(mergeType).concat("<br>");
+                    lastType = mergeType;
+                }
+
+                if (hasWin)
+                {
+                    String countWin = "";
+
+                    for (int i = 0; i < model.getCountWin(); i++)
+                    {
+                        countWin += "*";
+                    }
+
+                    number = Formats.getStringHtmlText("", number + countWin, "#FF0000");
+                }
+
+                message = message.concat(number);
+                message = message.concat(" ");
+
+                if (isLast)
+                {
+                    message = message.concat("x").concat(price).concat(unit).concat(" ");
+                }
+
+                lastCost = Long.parseLong(price);
+
+                MessageDBHelper.updateWinMessage(config.getPhone(), time, messageType.name(), message);
+            }
+        }
+    }
+
+    public FollowModel getaPartOfFlowModel(final Analyze analyze, final String number, final String type, final String price, final String unit, final String time, final TypeMessage messageType) {
+
+        return new FollowModel() {
+            @Override
+            public String getName() {
+                return config.getName();
+            }
+
+            @Override
+            public String getPhone() {
+                return config.getPhone();
+            }
+
+            @Override
+            public String getNumber() {
+                return number;
+            }
+
+            @Override
+            public String getContent() {
+                return null;
+            }
+
+            @Override
+            public double getAmountPoint() {
+                return countAmountPoint(config, price, type);
+            }
+
+            @Override
+            public String getUnit() {
+                return unit;
+            }
+
+            @Override
+            public String getPrice() {
+                return price;
+            }
+
+            @Override
+            public String getActualCollect() {
+                return analyze == null || analyze.actuallyCollected == null ? "0" : Formats.formatBigDecimal((analyze.actuallyCollected));
+            }
+
+            @Override
+            public int getCountWin() {
+                return analyze == null ? 0 : StatisticControlImport.getCountSubstring(number, analyze.winNumber);
+            }
+
+            @Override
+            public String getPointWin() {
+                return StatisticControlImport.getPointWin(number, type, price, analyze.winNumber);
+            }
+
+            @Override
+            public String getGuestWin() {
+                return analyze.guestWin == null ? "0" : analyze.guestWin.round(new MathContext(2, RoundingMode.HALF_UP)).toString();
+            }
+
+            @Override
+            public String getType() {
+                return type;
+            }
+
+            @Override
+            public String getTime() {
+                return time;
+            }
+
+            @Override
+            public TypeMessage getMessageType() {
+                return messageType;
+            }
+
+            @Override
+            public String getWinSyntax() {
+                return analyze.winSyntax;
+            }
+
+            @Override
+            public String getErrorMessage() {
+                return null;
+            }
+        };
+    }
+
+    private double countAmountPoint(ContactModel config, String price, String type) {
+        return Double.parseDouble(price) * config.getValue(LotoType.convert(type)) / 1000d;
+    }
+}

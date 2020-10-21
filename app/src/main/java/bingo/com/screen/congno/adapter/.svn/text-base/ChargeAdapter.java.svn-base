@@ -1,0 +1,82 @@
+package bingo.com.screen.congno.adapter;
+
+import android.content.Context;
+import android.database.Cursor;
+import android.support.v7.widget.RecyclerView;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.TextView;
+
+import bingo.com.R;
+import bingo.com.base.baseadapter.BaseCursorRecyclerAdapter;
+import bingo.com.base.baseview.BaseRecyclerViewHolder;
+import bingo.com.helperdb.CongnoDBHelper;
+import bingo.com.helperdb.db.CongnoDatabase;
+import butterknife.Bind;
+
+/**
+ * Created by kazinguyen on 7/15/17.
+ */
+public class ChargeAdapter extends BaseCursorRecyclerAdapter<ChargeAdapter.ViewHolder> {
+
+    private Context context;
+
+    public ChargeAdapter(Context context, Cursor cursor) {
+        super(context, cursor);
+
+        this.context = context;
+    }
+
+    @Override
+    public void onBindViewHolder(ViewHolder viewHolder, Cursor cursor) {
+        String phone = cursor.getString(cursor.getColumnIndex(CongnoDatabase.DETAIL_PHONE));
+
+        String name = cursor.getString(cursor.getColumnIndex(CongnoDatabase.DETAIL_NAME));
+        int phatsinh = cursor.getInt(cursor.getColumnIndex("sum"));
+
+        int nocu = CongnoDBHelper.getNoCu(phone);
+
+        int sum = nocu;
+
+        sum += phatsinh;
+
+        String socuoi = String.valueOf(sum);
+
+        viewHolder.setData(name, String.valueOf(nocu), String.valueOf(phatsinh), socuoi);
+    }
+
+    @Override
+    public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        View view = View.inflate(context, R.layout.item_charge, null);
+        view.setLayoutParams(new RecyclerView.LayoutParams(RecyclerView.LayoutParams.MATCH_PARENT, RecyclerView.LayoutParams.WRAP_CONTENT));
+
+        return new ViewHolder(view);
+    }
+
+    static class ViewHolder extends BaseRecyclerViewHolder {
+
+        @Bind(R.id.item_charge_name)
+        TextView name;
+
+        @Bind(R.id.item_charge_nocu)
+        TextView nocu;
+
+        @Bind(R.id.item_charge_phatsinh)
+        TextView phatsinh;
+
+        @Bind(R.id.item_charge_socuoi)
+        TextView socuoi;
+
+        public ViewHolder(View itemView) {
+            super(itemView);
+
+        }
+
+        public void setData(String name, String nocu, String phatsinh, String socuoi) {
+            this.name.setText(name);
+            this.nocu.setText(nocu);
+            this.phatsinh.setText(phatsinh);
+            this.socuoi.setText(socuoi);
+        }
+    }
+}

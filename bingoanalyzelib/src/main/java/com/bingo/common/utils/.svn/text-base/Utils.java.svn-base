@@ -1,0 +1,275 @@
+package com.bingo.common.utils;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import com.bingo.analyze.ExtractObject;
+import com.bingo.analyze.RemoveObject;
+
+public class Utils {
+	public static ArrayList<String> getRemoveNumber(String syntax) {
+		// de bo 12, bo 13 bor 21, 31x500k
+		Pattern pattern = Pattern.compile("bor");
+		int count = countMatches(pattern, syntax); // Returns 2
+		ArrayList<String> removeSyntaxArray = new ArrayList<>();
+		if (count == 1) {
+			String subString = syntax.substring(syntax.indexOf("bor") + 3, syntax.indexOf("x"));
+			removeSyntaxArray.add(subString.trim());
+		} else {
+
+			String[] subStrings = syntax.split("bor");
+			int index = 0;
+			for (String sub : subStrings) {
+				if (index == 0) {
+				} else {
+					boolean isEndSyntax = sub.matches(".*x[0-9]+\\s*k|.*x[0-9]+\\s*d");
+					if (isEndSyntax) {
+						sub = sub.substring(0, sub.indexOf("x"));
+					}
+					removeSyntaxArray.add(sub.trim());
+				}
+
+				index++;
+			}
+
+		}
+
+		return removeSyntaxArray;
+	}
+
+	public static ArrayList<RemoveObject> extractRemoveNumber(ArrayList<String> removeSyntaxArray) {
+		ArrayList<RemoveObject> numbers = new ArrayList<RemoveObject>();
+		String regxDau = ".*dau\\s*[0-9]+.*";
+		String regxDit = ".*dit\\s*[0-9]+.*|.*duoi\\s*[0-9]+.*";
+		String regxTong = ".*tong\\s*[0-9]+.*";
+		String regxBo = ".*bo\\s*[0-9]+.*";
+
+		for (String sub : removeSyntaxArray) {
+			String newSub = sub;
+			if (sub.matches(regxDau)) {
+				String reg = ".*(dau\\s*)([0-9\\,\\.\\-\\;\\s]*).*";
+				Pattern pattern = Pattern.compile(reg);
+				Matcher matcher = pattern.matcher(sub);
+				while (matcher.find()) {
+					String[] nums = matcher.group(2).split(" ");
+					for (String num : nums) {
+						if (!num.trim().equals("") && isInteger(num.trim())) {
+							RemoveObject obj = new RemoveObject();
+							obj.Number = num.trim();
+							obj.Type = "dau";
+							numbers.add(obj);
+						}
+					}
+				}
+
+				newSub = newSub.replaceAll(regxDau, "");
+			}
+
+			if (sub.matches(regxDit)) {
+				String reg = ".*([dit|duoi]\\s*)([0-9\\,\\.\\-\\;\\s]*).*";
+				Pattern pattern = Pattern.compile(reg);
+				Matcher matcher = pattern.matcher(sub);
+				while (matcher.find()) {
+					String[] nums = matcher.group(2).split(" |,|;|-|_|\\.");
+					;
+					for (String num : nums) {
+						if (!num.trim().equals("") && isInteger(num.trim())) {
+							RemoveObject obj = new RemoveObject();
+							obj.Number = num.trim();
+							obj.Type = "duoi";
+							numbers.add(obj);
+						}
+					}
+				}
+
+				newSub = newSub.replaceAll(regxDit, "");
+			}
+
+			if (sub.matches(regxTong)) {
+				String reg = ".*(tong\\s*)([0-9\\,\\.\\-\\;\\s]*).*";
+				Pattern pattern = Pattern.compile(reg);
+				Matcher matcher = pattern.matcher(sub);
+				while (matcher.find()) {
+					String[] nums = matcher.group(2).split(" |,|;|-|_|\\.");
+					;
+					for (String num : nums) {
+						if (!num.trim().equals("") && isInteger(num.trim())) {
+							RemoveObject obj = new RemoveObject();
+							obj.Number = num.trim();
+							obj.Type = "tong";
+							numbers.add(obj);
+						}
+					}
+				}
+
+				newSub = newSub.replaceAll(regxTong, "");
+			}
+
+			if (sub.matches(regxBo)) {
+				String reg = ".*(boj\\s*)([0-9\\,\\.\\-\\;\\s]*).*";
+				Pattern pattern = Pattern.compile(reg);
+				Matcher matcher = pattern.matcher(sub);
+				while (matcher.find()) {
+					String[] nums = matcher.group(2).split(" |,|;|-|_|\\.");
+					for (String num : nums) {
+						if (!num.trim().equals("") && isInteger(num.trim())) {
+							RemoveObject obj = new RemoveObject();
+							obj.Number = num.trim();
+							obj.Type = "boj";
+							numbers.add(obj);
+						}
+					}
+				}
+
+				newSub = newSub.replaceAll(regxBo, "");
+			}
+
+			if (newSub.equals(""))
+				continue;
+			String[] _words = newSub.split(" |,|;|-|_|\\.");
+			for (String word : _words) {
+				if (isInteger(word.trim())) {
+					if (word.trim().length() == 2) {
+						RemoveObject obj = new RemoveObject();
+						obj.Number = word.trim();
+						obj.Type = "sole";
+						numbers.add(obj);
+					} else if (word.trim().length() == 3) {
+						RemoveObject obj = new RemoveObject();
+						obj.Number = word.trim().substring(0, 2);
+						obj.Type = "sole";
+						numbers.add(obj);
+						RemoveObject obj2 = new RemoveObject();
+						obj2.Number = word.trim().substring(1, word.trim().length());
+						obj2.Type = "sole";
+						numbers.add(obj2);
+					} else {
+						ArrayList<String> splitNumberSize = splitEqually(word.trim(), 2);
+						for (String numSize : splitNumberSize) {
+							RemoveObject obj = new RemoveObject();
+							obj.Number = numSize;
+							obj.Type = "sole";
+							numbers.add(obj);
+						}
+					}
+				} else {
+
+				}
+			}
+
+		}
+		return numbers;
+	}
+	
+
+	public static ExtractObject extractNumberAndUnitPrice(String syntax, String type) {
+		String regNumber = "([0-9]+.*)x([0-9]+\\s*[kd]{1})";
+		Pattern patternNumber = Pattern.compile(regNumber);
+		Matcher matcherNumber = patternNumber.matcher(syntax);
+		ExtractObject extractObject = new ExtractObject();
+		extractObject.Type = type;
+		extractObject.Numbers = new ArrayList<>();
+		while (matcherNumber.find()) {
+			String numbers = matcherNumber.group(1);
+			for (String number : numbers.split(" ")) {
+				if (number.trim().equals(""))
+					continue;
+				extractObject.Numbers.add(number);
+			}
+			String unitAndMoney = matcherNumber.group(2);
+			extractObject.Money = unitAndMoney.substring(0, unitAndMoney.length() - 1);
+			extractObject.Unit = unitAndMoney.substring(unitAndMoney.length() - 1, unitAndMoney.length());
+		}
+		
+		extractObject.Syntax = syntax;
+		return extractObject;
+	}
+	
+	public static ExtractObject extractUnitPrice(String syntax) {
+		String regNumber = "x\\s*([0-9]+\\s*[kd]{1})";
+		Pattern patternNumber = Pattern.compile(regNumber);
+		Matcher matcherNumber = patternNumber.matcher(syntax);
+		ExtractObject extractObject = new ExtractObject();
+		while (matcherNumber.find()) {
+			String unitAndMoney = matcherNumber.group(1);
+			extractObject.Money = unitAndMoney.substring(0, unitAndMoney.length() - 1);
+			extractObject.Unit = unitAndMoney.substring(unitAndMoney.length() - 1, unitAndMoney.length());
+		}
+		extractObject.Syntax = syntax;
+		return extractObject;
+	}
+
+	public static int countMatches(Pattern pattern, String string) {
+		Matcher matcher = pattern.matcher(string);
+
+		int count = 0;
+		int pos = 0;
+		while (matcher.find(pos)) {
+			count++;
+			pos = matcher.start() + 1;
+		}
+
+		return count;
+	}
+
+	public static ArrayList<String> splitEqually(String text, int size) {
+		// Give the list the right capacity to start with. You could use an
+		// array
+		// instead if you wanted.
+		ArrayList<String> ret = new ArrayList<String>((text.length() + size - 1) / size);
+
+		for (int start = 0; start < text.length(); start += size) {
+			ret.add(text.substring(start, Math.min(text.length(), start + size)));
+		}
+		return ret;
+	}
+	
+	public static boolean isInteger(String str) {
+    	String newString = str.substring(0, 1);
+        int size = newString.length();
+
+        for (int i = 0; i < size; i++) {
+            if (!Character.isDigit(newString.charAt(i))) {
+                return false;
+            }
+        }
+
+        return size > 0;
+    }
+	
+	public static ArrayList<String> getNumber(String line) {
+		String regex = "(\\d+)";
+		ArrayList<String> numbers = new ArrayList<>();
+		Matcher matcher = Pattern.compile(regex).matcher(line);
+		while (matcher.find()) {
+			String num = matcher.group();
+			numbers.add(num);
+		}
+		return numbers;
+	}
+	
+	public static ArrayList<String> getNumber(String line, String firtLetter) {
+		String regex = firtLetter+"(\\d+).*";
+		ArrayList<String> numbers = new ArrayList<>();
+		Matcher matcher = Pattern.compile(regex).matcher(line);
+		while (matcher.find()) {
+			String num = matcher.group();
+			numbers.add(num);
+		}
+		return numbers;
+	}
+	
+	public static ArrayList<String> getTypeTotal(String syntax) {
+		String regex = ".*tong\\s*([0-9\\s]+)\\s*x[0-9]+.*";
+		ArrayList<String> numbers = new ArrayList<>();
+		Matcher matcher = Pattern.compile(regex).matcher(syntax);
+		while (matcher.find()) {
+			String num = matcher.group(1);
+			numbers.add(num);
+		}
+		return numbers;
+	}
+	
+}

@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/dialog_bg"
+    android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/xuatso_text1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@android:color/holo_blue_dark"
+        android:paddingBottom="10dp"
+        android:paddingLeft="5dp"
+        android:paddingRight="5dp"
+        android:paddingTop="10dp"
+        android:text="Xuất số chuyển đi"
+        android:textAlignment="center"
+        android:textColor="@android:color/white"
+        android:textSize="18sp"
+        android:textStyle="bold" />
+
+    <RadioGroup
+        android:id="@+id/xuatso_radiogroup"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/xuatso_text1"
+        android:orientation="horizontal"
+        android:paddingBottom="5dp"
+        android:paddingLeft="5dp"
+        android:paddingRight="5dp"
+        android:paddingTop="10dp">
+
+        <RadioButton
+            android:id="@+id/xuatso_typexuatso"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Xuất số"
+            android:textColor="@android:color/holo_red_dark" />
+
+        <RadioButton
+            android:id="@+id/xuatso_typetinnhan"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Chuyển tin nhắn"
+            android:textColor="@android:color/holo_red_dark" />
+    </RadioGroup>
+
+    <RelativeLayout
+        android:id="@+id/xuatso_relativespin"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/xuatso_radiogroup"
+        android:visibility="gone">
+
+        <Spinner
+            android:id="@+id/xuatso_spin"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:background="@drawable/spinner_bg"
+            android:spinnerMode="dropdown"
+            android:verticalScrollbarPosition="right" />
+
+        <ImageView
+            android:layout_width="60dp"
+            android:layout_height="50dp"
+            android:layout_alignParentEnd="true"
+            android:background="@drawable/drop"
+            android:contentDescription="@null" />
+
+        <TextView
+            android:id="@+id/xuatso_infocustomer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/xuatso_spin"
+            android:padding="10dp"
+            android:text="123"
+            android:textColor="@android:color/holo_red_dark" />
+    </RelativeLayout>
+
+    <EditText
+        android:id="@+id/xuatso_edittext"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/xuatso_linearbtm"
+        android:layout_alignParentEnd="true"
+        android:layout_below="@+id/xuatso_relativespin"
+        android:layout_toEndOf="@+id/xuatso_radiogroup2"
+        android:hint="Nhập dàn:\nVD: đầu 234 x 100n\nđầu 1234567 ghép đít 456789 x 50"
+        android:padding="5dp"
+        android:textSize="14sp" />
+
+    <RadioGroup
+        android:id="@+id/xuatso_radiogroup2"
+        android:layout_width="120dp"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_below="@+id/xuatso_relativespin"
+        android:padding="5dp">
+
+        <RadioButton
+            android:id="@+id/xuatso_xuatde"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Đề" />
+
+        <RadioButton
+            android:id="@+id/xuatso_xuatlo"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Xuất Lô" />
+
+        <RadioButton
+            android:id="@+id/xuatso_xuatxien"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Xuất xiên" />
+
+        <RadioButton
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Đề đầu ĐB"
+            android:visibility="gone" />
+
+        <RadioButton
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Đề đầu G1"
+            android:visibility="gone" />
+
+        <RadioButton
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Đề đít G1"
+            android:visibility="gone" />
+
+        <RadioButton
+            android:id="@+id/xuatso_xuatbacang"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Ba càng" />
+    </RadioGroup>
+
+    <LinearLayout
+        android:id="@+id/xuatso_linearbtm"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/xuatso_radiogroup2"
+        android:orientation="vertical">
+
+        <Button
+            android:id="@+id/xuatso_xuatdan"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="5dp"
+            android:text="Xuất số"
+            android:textColor="@android:color/holo_red_dark" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/xuatso_xuatdan"
+            android:padding="5dp"
+            android:text="Xuất số: Để copy chuyển tin qua FB hoặc Zalo"
+            android:textAlignment="center"
+            android:textColor="@android:color/holo_red_dark" />
+    </LinearLayout>
+
+    <Button
+        android:id="@+id/xuatso_xuatnhan"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/xuatso_radiogroup2"
+        android:padding="5dp"
+        android:text="Xuất + nhắn"
+        android:textColor="@android:color/holo_red_dark" />
+</RelativeLayout>

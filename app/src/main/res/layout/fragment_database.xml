@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/white">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="5dp"
+            android:text="Phần mềm tải kết quả trực tiếp từ trang www.ketqua.vn, thời gian mặc định tải kết quả là 16:32\n\nNếu đến thời gian cài đặt (hoặc muốn update kết quả sớm hơn) thì bấm cập nhật kết quả bằng tay."
+            android:textColor="@android:color/black" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="5dp"
+            android:layout_marginStart="5dp"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/dbscreen_updateresult"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="5dp"
+                android:layout_weight="1"
+                android:background="@drawable/button_bg"
+                android:text="Cập nhật KQ từ\n8085" />
+
+            <Button
+                android:id="@+id/dbscreen_updateresult997"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="5dp"
+                android:layout_weight="1"
+                android:background="@drawable/button_bg"
+                android:text="Cập nhật KQ từ\n997" />
+        </LinearLayout>
+
+        <Button
+            android:id="@+id/dbscreen_updateresultweb"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="5dp"
+            android:background="@drawable/button_bg"
+            android:text="Cập nhật KQ từ Server" />
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="5dp"
+            android:background="@drawable/button_bg">
+
+            <TextView
+                android:id="@+id/dbscreen_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="5dp"
+                android:text="Xem KQ hôm nay: "
+                android:textStyle="bold" />
+
+            <Switch
+                android:id="@+id/dbscreen_showketqua"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:checked="false"
+                android:padding="5dp"
+                android:visibility="gone" />
+
+            <TextView
+                android:id="@+id/dbscreen_ketqua"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/dbscreen_text"
+                android:padding="5dp"
+                android:textAlignment="viewStart"
+                android:textColor="@android:color/black"
+                android:textSize="16sp"
+                android:visibility="gone" />
+        </RelativeLayout>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="5dp"
+            android:text="Sau khi cập nhật thì tính tiền"
+            android:textColor="@android:color/black" />
+
+        <Button
+            android:id="@+id/dbscreen_calculate"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="5dp"
+            android:layout_marginStart="5dp"
+            android:background="@drawable/button_bg"
+            android:text="Tính tiền thủ công" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="5dp"
+            android:text="Gửi tin nhắn chốt tiền cho tất cả khách hàng"
+            android:textColor="@android:color/black" />
+
+        <Button
+            android:id="@+id/dbscreen_sendmessage"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="5dp"
+            android:layout_marginStart="5dp"
+            android:background="@drawable/button_bg"
+            android:text="Nhắn tin chốt tiền" />
+
+        <Button
+            android:id="@+id/dbscreen_deletekeepdb"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="5dp"
+            android:layout_marginStart="5dp"
+            android:layout_marginTop="5dp"
+            android:background="@drawable/button_bg"
+            android:text="Xóa hết dữ liệu giữ"
+            android:visibility="gone" />
+
+        <Button
+            android:id="@+id/dbscreen_deletedb"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="5dp"
+            android:layout_marginStart="5dp"
+            android:layout_marginTop="5dp"
+            android:background="@drawable/button_bg"
+            android:text="Xóa hết cơ sở dữ liệu trong ngày" />
+
+        <Button
+            android:id="@+id/dbscreen_deletealldb"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="5dp"
+            android:layout_marginStart="5dp"
+            android:layout_marginTop="5dp"
+            android:background="@drawable/button_bg"
+            android:text="Xóa hết cơ sở dữ liệu" />
+    </LinearLayout>
+</ScrollView>

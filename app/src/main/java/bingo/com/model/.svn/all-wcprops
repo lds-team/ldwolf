@@ -1,0 +1,59 @@
+K 25
+svn:wc:ra_dav:version-url
+V 75
+/svn/BINGO/!svn/ver/156/BingoNew/BingoNew/app/src/main/java/bingo/com/model
+END
+ChooseMessage.java
+K 25
+svn:wc:ra_dav:version-url
+V 94
+/svn/BINGO/!svn/ver/121/BingoNew/BingoNew/app/src/main/java/bingo/com/model/ChooseMessage.java
+END
+ResultModel.java
+K 25
+svn:wc:ra_dav:version-url
+V 92
+/svn/BINGO/!svn/ver/159/BingoNew/BingoNew/app/src/main/java/bingo/com/model/ResultModel.java
+END
+ResultReturnModel.java
+K 25
+svn:wc:ra_dav:version-url
+V 98
+/svn/BINGO/!svn/ver/116/BingoNew/BingoNew/app/src/main/java/bingo/com/model/ResultReturnModel.java
+END
+StatisticInfoModel.java
+K 25
+svn:wc:ra_dav:version-url
+V 99
+/svn/BINGO/!svn/ver/109/BingoNew/BingoNew/app/src/main/java/bingo/com/model/StatisticInfoModel.java
+END
+MessageForm.java
+K 25
+svn:wc:ra_dav:version-url
+V 92
+/svn/BINGO/!svn/ver/161/BingoNew/BingoNew/app/src/main/java/bingo/com/model/MessageForm.java
+END
+LotoMessage.java
+K 25
+svn:wc:ra_dav:version-url
+V 92
+/svn/BINGO/!svn/ver/122/BingoNew/BingoNew/app/src/main/java/bingo/com/model/LotoMessage.java
+END
+ContactModel.java
+K 25
+svn:wc:ra_dav:version-url
+V 93
+/svn/BINGO/!svn/ver/152/BingoNew/BingoNew/app/src/main/java/bingo/com/model/ContactModel.java
+END
+FollowModel.java
+K 25
+svn:wc:ra_dav:version-url
+V 92
+/svn/BINGO/!svn/ver/122/BingoNew/BingoNew/app/src/main/java/bingo/com/model/FollowModel.java
+END
+CongnoModel.java
+K 25
+svn:wc:ra_dav:version-url
+V 92
+/svn/BINGO/!svn/ver/122/BingoNew/BingoNew/app/src/main/java/bingo/com/model/CongnoModel.java
+END

@@ -1,0 +1,159 @@
+package bingo.com.screen.numberreport.adapter;
+
+import android.content.Context;
+import android.database.Cursor;
+import android.text.Html;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.TextView;
+
+import bingo.com.R;
+import bingo.com.base.baseadapter.BaseCursorRecyclerAdapter;
+import bingo.com.base.baseview.BaseRecyclerViewHolder;
+import bingo.com.callbacks.UpdateSync;
+import bingo.com.customviews.ResultView;
+import bingo.com.dialog.EditMessageDialog;
+import bingo.com.enumtype.TypeMessage;
+import bingo.com.helperdb.FollowDBHelper;
+import bingo.com.helperdb.MessageDBHelper;
+import bingo.com.helperdb.db.MessageDatabase;
+import bingo.com.model.ChooseMessage;
+import bingo.com.utils.Utils;
+import butterknife.Bind;
+
+/**
+ * Created by kazinguyen on 6/15/17.
+ */
+public class MessageAdapter extends BaseCursorRecyclerAdapter<MessageAdapter.ViewHolder> {
+
+    private Context context;
+
+    public MessageAdapter(Context context, Cursor cursor) {
+        super(context, cursor);
+
+        this.context = context;
+    }
+
+    @Override
+    public void onBindViewHolder(ViewHolder viewHolder, Cursor cursor) {
+        final String phone = getCursor().getString(getCursor().getColumnIndex(MessageDatabase.PHONE));
+        final String time = cursor.getString(cursor.getColumnIndex(MessageDatabase.TIME));
+        final String name = cursor.getString(cursor.getColumnIndex(MessageDatabase.NAME));
+        final String rawmes = cursor.getString(cursor.getColumnIndex(MessageDatabase.RAW_CONTENT)).trim();
+        final String analyzemes = cursor.getString(cursor.getColumnIndex(MessageDatabase.ANALYZE_CONTENT)).trim();
+        final String mesWin = cursor.getString(cursor.getColumnIndex(MessageDatabase.WIN_NUMBER));
+        final String type = cursor.getString(cursor.getColumnIndex(MessageDatabase.TYPE));
+
+        Cursor c;
+
+        if (type.equals(TypeMessage.SENT.name()))
+        {
+            c = FollowDBHelper.getSumSentParentTypeWithPhone(phone, time);
+        }
+        else
+        {
+            c = FollowDBHelper.getSumAllParentTypeWithPhone(phone, time);
+        }
+
+        try {
+
+            viewHolder.setData(name, phone, String.valueOf(cursor.getPosition() + 1), time, mesWin, rawmes, analyzemes, c,
+                    "parenttype", "sumpoint", "sumpointwin", "summoney", "sumwin");
+        } finally {
+            c.close();
+        }
+    }
+
+    @Override
+    public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        View view = View.inflate(context, R.layout.item_messageadapter, null);
+        return new ViewHolder(view);
+    }
+
+    @Override
+    public void onViewRecycled(ViewHolder holder) {
+        super.onViewRecycled(holder);
+
+        holder.resultView.removeAllViews();
+    }
+
+    private void requestChange(String phone) {
+        this.swapCursor(MessageDBHelper.getMessageOnly(phone, TypeMessage.SMS, 0));
+    }
+
+    class ViewHolder extends BaseRecyclerViewHolder implements UpdateSync {
+
+        @Bind(R.id.item_messageadapter_textname)
+        TextView name;
+
+        @Bind(R.id.item_messageadapter_textcount)
+        TextView id;
+
+        @Bind(R.id.item_messageadapter_texttime)
+        TextView time;
+
+        @Bind(R.id.item_messageadapter_meswin)
+        TextView win;
+
+        @Bind(R.id.item_messageadapter_mesraw)
+        TextView message;
+
+        @Bind(R.id.item_messageadapter_resultview)
+        ResultView resultView;
+
+        private EditMessageDialog dialog;
+
+        private String phone;
+
+        public ViewHolder(View itemView) {
+            super(itemView);
+
+            resultView.setUp(ResultView.TYPE_5_ITEM);
+
+            itemView.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View v) {
+                    getCursor().moveToPosition(getLayoutPosition());
+
+                    String name = getCursor().getString(getCursor().getColumnIndex(MessageDatabase.NAME));
+                    String phone = getCursor().getString(getCursor().getColumnIndex(MessageDatabase.PHONE));
+                    String time = getCursor().getString(getCursor().getColumnIndex(MessageDatabase.TIME));
+                    String mes = getCursor().getString(getCursor().getColumnIndex(MessageDatabase.CONTENT));
+                    String type = getCursor().getString(getCursor().getColumnIndex(MessageDatabase.TYPE));
+
+                    dialog = new EditMessageDialog(context, false);
+                    dialog.setData(new ChooseMessage(name, phone, time, mes, type));
+                    dialog.setOnUpdateOnDismissListner(ViewHolder.this);
+                    dialog.show();
+
+                    ViewHolder.this.phone = phone;
+
+                    return true;
+                }
+            });
+        }
+
+        public void setData(String name, String phone, String id, String time, String mesWin, String mesRaw, String mes, Cursor cursor, String... column) {
+            this.name.setText(name);
+            this.id.setText(id);
+            this.time.setText(Utils.convertTime(time));
+            this.win.setText(mesRaw);
+
+            /*Spanned text = Formats.formatStringWin(mes, mesWin);*/
+            this.message.setText(Html.fromHtml(mes));
+
+            resultView.addAlls(cursor, column);
+        }
+
+        public void clearDialog() {
+            dialog.setOnUpdateOnDismissListner(null);
+            dialog.releaseViews();
+        }
+
+        @Override
+        public void onUpdate() {
+            requestChange(phone);
+            clearDialog();
+        }
+    }
+}

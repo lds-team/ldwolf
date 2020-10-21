@@ -1,0 +1,281 @@
+package bingo.com;
+
+import android.Manifest;
+import android.content.pm.PackageManager;
+import android.os.Build;
+import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.design.widget.NavigationView;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
+import android.support.v4.view.GravityCompat;
+import android.support.v4.widget.DrawerLayout;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
+import android.view.View;
+
+import bingo.com.base.BaseActivity;
+import bingo.com.base.BaseFragment;
+import bingo.com.screen.configscreen.SettingsFragment;
+import bingo.com.screen.congno.CongNoFragment;
+import bingo.com.screen.dbscreen.DatabaseFragment;
+import bingo.com.screen.editmessagescreen.EditMessageFragment;
+import bingo.com.screen.helperscreen.HelperFragment;
+import bingo.com.screen.homescreen.HomeFragment;
+import bingo.com.screen.modelscreen.ModelFragment;
+import bingo.com.screen.numberreport.NumberReportFragment;
+import butterknife.Bind;
+import butterknife.ButterKnife;
+
+public class MainActivity extends BaseActivity {
+
+    @Bind(R.id.drawer_layout)
+    DrawerLayout mDrawerLayout;
+
+    private BaseFragment mTarget;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        setContentView(R.layout.activity_main);
+
+        ButterKnife.bind(this);
+
+        showBackButton(0, true);
+
+        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+
+        if (navigationView != null)
+        {
+            navigationView.setItemIconTintList(null);
+            setupDrawerContent(navigationView);
+        }
+
+        firstTransition();
+
+        if (Build.VERSION.SDK_INT >= 23)
+        {
+            requestSmsPermission();
+        }
+
+        //Start Observer Message thread change.
+        /*startService(new Intent(this, MessageChangeService.class));*/
+    }
+
+    private void requestSmsPermission() {
+        requestReceiveSMS();
+        /*requestReadSMS();*/
+        requestReadExtenal();
+        requestWriteExtenal();
+    }
+
+    private void requestReceiveSMS() {
+        String permission = Manifest.permission.RECEIVE_SMS;
+        int grant = ContextCompat.checkSelfPermission(this, permission);
+        if (grant != PackageManager.PERMISSION_GRANTED) {
+            String[] permission_list = new String[1];
+            permission_list[0] = permission;
+            ActivityCompat.requestPermissions(this, permission_list, 1);
+        }
+    }
+
+    private void requestReadExtenal() {
+        String permission = Manifest.permission.READ_EXTERNAL_STORAGE;
+        int grant = ContextCompat.checkSelfPermission(this, permission);
+        if (grant != PackageManager.PERMISSION_GRANTED) {
+            String[] permission_list = new String[1];
+            permission_list[0] = permission;
+            ActivityCompat.requestPermissions(this, permission_list, 1);
+        }
+    }
+
+    private void requestReadContact() {
+        String permission = Manifest.permission.READ_CONTACTS;
+        int grant = ContextCompat.checkSelfPermission(this, permission);
+        if (grant != PackageManager.PERMISSION_GRANTED) {
+            String[] permission_list = new String[1];
+            permission_list[0] = permission;
+            ActivityCompat.requestPermissions(this, permission_list, 1);
+        }
+    }
+
+    private void requestReadSMS() {
+        String permission = Manifest.permission.READ_SMS;
+        int grant = ContextCompat.checkSelfPermission(this, permission);
+        if (grant != PackageManager.PERMISSION_GRANTED) {
+            String[] permission_list = new String[1];
+            permission_list[0] = permission;
+            ActivityCompat.requestPermissions(this, permission_list, 1);
+        }
+    }
+
+    private void requestWriteExtenal() {
+      String permission = Manifest.permission.WRITE_EXTERNAL_STORAGE;
+        int grant = ContextCompat.checkSelfPermission(this, permission);
+        if (grant != PackageManager.PERMISSION_GRANTED) {
+            String[] permission_list = new String[1];
+            permission_list[0] = permission;
+            ActivityCompat.requestPermissions(this, permission_list, 1);
+        }
+    }
+
+    private void requestSendSMS() {
+        String permission = Manifest.permission.SEND_SMS;
+        int grant = ContextCompat.checkSelfPermission(this, permission);
+        if (grant != PackageManager.PERMISSION_GRANTED) {
+            String[] permission_list = new String[1];
+            permission_list[0] = permission;
+            ActivityCompat.requestPermissions(this, permission_list, 1);
+        }
+    }
+
+    private void firstTransition() {
+        BaseFragment f = getExistFragment(HomeFragment.class, HomeFragment.TAG);
+        transition(f, HomeFragment.TAG);
+    }
+
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        menu.clear();
+
+        return super.onPrepareOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                mDrawerLayout.openDrawer(GravityCompat.START);
+                return true;
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
+    private void setupDrawerContent(final NavigationView navigationView) {
+
+        navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
+            @Override
+            public boolean onNavigationItemSelected(@NonNull final MenuItem menuItem) {
+
+                menuItem.setChecked(true);
+
+                getLoadingAnimation().show();
+
+                mDrawerLayout.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+
+                        switch (menuItem.getItemId()) {
+                            case R.id.nav_home:
+
+                                mTarget = getExistFragment(HomeFragment.class, HomeFragment.TAG);
+
+                                mDrawerLayout.closeDrawer(GravityCompat.START);
+                                break;
+
+                            case R.id.nav_editsms:
+
+                                mTarget = getExistFragment(EditMessageFragment.class, EditMessageFragment.TAG);
+
+                                mDrawerLayout.closeDrawer(GravityCompat.START);
+                                break;
+
+                            case R.id.nav_numreport:
+
+                                mTarget = getExistFragment(NumberReportFragment.class, NumberReportFragment.TAG);
+
+                                mDrawerLayout.closeDrawer(GravityCompat.START);
+                                break;
+
+                            case R.id.nav_moneyreport:
+
+                                mTarget = getExistFragment(CongNoFragment.class, CongNoFragment.TAG);
+
+                                mDrawerLayout.closeDrawer(GravityCompat.START);
+                                break;
+
+                            case R.id.nav_settings:
+
+                                mTarget = getExistFragment(SettingsFragment.class, SettingsFragment.TAG);
+
+                                mDrawerLayout.closeDrawer(GravityCompat.START);
+                                break;
+
+                            case R.id.nav_instructions:
+
+                                mTarget = getExistFragment(HelperFragment.class, HelperFragment.TAG);
+
+                                mDrawerLayout.closeDrawer(GravityCompat.START);
+                                break;
+
+                            case R.id.nav_template:
+
+                                mTarget = getExistFragment(ModelFragment.class, ModelFragment.TAG);
+
+                                mDrawerLayout.closeDrawer(GravityCompat.START);
+                                break;
+
+                            case R.id.nav_database:
+
+                                mTarget = getExistFragment(DatabaseFragment.class, DatabaseFragment.TAG);
+
+                                mDrawerLayout.closeDrawer(GravityCompat.START);
+                                break;
+
+                            default:
+                                dismissLoading();
+                                mTarget = null;
+                                mDrawerLayout.closeDrawer(GravityCompat.START);
+                                break;
+
+                        }
+
+                    }
+                }, 10);
+
+
+                return true;
+            }
+        });
+
+        //Listen When Drawer Close to Execute Tasks.
+        mDrawerLayout.setDrawerListener(new DrawerLayout.DrawerListener() {
+            @Override
+            public void onDrawerSlide(View drawerView, float slideOffset) {
+            }
+
+            @Override
+            public void onDrawerOpened(View drawerView) {
+            }
+
+            @Override
+            public void onDrawerClosed(View drawerView) {
+                executeTrans();
+            }
+
+            @Override
+            public void onDrawerStateChanged(int newState) {
+            }
+        });
+    }
+
+    private void executeTrans() {
+        if (mTarget != null) {
+            transition(mTarget, mTarget.initTag());
+        }
+
+        dismissLoading();//TODO remove
+
+        mTarget = null;
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        ButterKnife.unbind(this);
+    }
+}

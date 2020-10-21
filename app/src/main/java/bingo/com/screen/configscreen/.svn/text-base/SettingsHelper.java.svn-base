@@ -1,0 +1,105 @@
+package bingo.com.screen.configscreen;
+
+import android.content.SharedPreferences;
+
+import bingo.com.utils.Keysaved;
+
+/**
+ * Created by kazinguyen on 6/25/17.
+ */
+public class SettingsHelper {
+
+    public static final int CHOT_SO_DU = 0;
+    public static final int CHOT_SO_DU_VA_CONG_NO_CU = 1;
+
+    public static final int OK_TIN_VA_NOI_DUNG = 0;
+    public static final int OK_TIN = 1;
+    public static final int KHONG_GUI = 2;
+    public static final int OK_TIN_DA_NHAN = 3;
+
+    public static final int DELIVER_LONG_MESSAGE = 0;
+    public static final int DELIVER_MESSAGE_160 = 1;
+    public static final int DELIVER_MESSAGE_320 = 2;
+    public static final int DELIVER_MESSAGE_480 = 3;
+
+    public static void saveTimeReceiveLoXien(SharedPreferences pref, String time) {
+        SharedPreferences.Editor editor = pref.edit();
+        editor.putString(Keysaved.TIME_RECEIVE_LOXIEN, time);
+        editor.apply();
+    }
+
+    public static String getTimeReceiveLoXien(SharedPreferences pref) {
+
+        return pref.getString(Keysaved.TIME_RECEIVE_LOXIEN, "18:32");
+    }
+
+    public static void saveTimeReceiveDe(SharedPreferences pref, String time) {
+        SharedPreferences.Editor editor = pref.edit();
+        editor.putString(Keysaved.TIME_RECEIVE_DE, time);
+        editor.apply();
+    }
+
+    public static String getTimeReceiveDe(SharedPreferences pref) {
+
+        return pref.getString(Keysaved.TIME_RECEIVE_DE, "18:32");
+    }
+
+    //------
+    public static void saveChotSoDuConfig(SharedPreferences pref, int type) {
+        SharedPreferences.Editor editor = pref.edit();
+        editor.putInt(Keysaved.CHOT_SO_DU, type);
+        editor.apply();
+    }
+
+    public static int getChotSoDuConfig(SharedPreferences pref) {
+
+        return pref.getInt(Keysaved.CHOT_SO_DU, CHOT_SO_DU);
+    }
+
+    //-----
+    public static void saveReplyMessageConfig(SharedPreferences pref, int type) {
+        SharedPreferences.Editor editor = pref.edit();
+        editor.putInt(Keysaved.REPLY_MESSAGE, type);
+        editor.apply();
+    }
+
+    public static int getReplyMessageConfig(SharedPreferences pref) {
+
+        return pref.getInt(Keysaved.REPLY_MESSAGE, KHONG_GUI);
+    }
+
+    //-----
+    public static void saveDeliveryConfig(SharedPreferences pref, int type) {
+        SharedPreferences.Editor editor = pref.edit();
+        editor.putInt(Keysaved.MESSAGE_DELIVERY, type);
+        editor.apply();
+    }
+
+    public static int getDeliveryConfig(SharedPreferences pref) {
+
+        return pref.getInt(Keysaved.MESSAGE_DELIVERY, DELIVER_LONG_MESSAGE);
+    }
+
+    //----
+    public static void savePointDeliverConfig(SharedPreferences pref, boolean isChecked) {
+        SharedPreferences.Editor editor = pref.edit();
+        editor.putBoolean(Keysaved.DELIVERY_BY_POINT, isChecked);
+        editor.apply();
+    }
+
+    public static boolean getPointDeliverConfig(SharedPreferences pref) {
+
+        return pref.getBoolean(Keysaved.DELIVERY_BY_POINT, false);
+    }
+
+    public static void save3CangConfig(SharedPreferences pref, int count) {
+        SharedPreferences.Editor editor = pref.edit();
+        editor.putInt(Keysaved.CONFIG_3CANG, count);
+        editor.apply();
+    }
+
+    public static int get3CangConfig(SharedPreferences pref) {
+
+        return pref.getInt(Keysaved.CONFIG_3CANG, 0);
+    }
+}

@@ -1,0 +1,52 @@
+package bingo.com.enumtype;
+
+/**
+ * Created by KaziNguyen on 20/06/2017.
+ */
+public enum LotoType {
+    @Deprecated
+    daudb,
+    @Deprecated
+    ditdb,
+    @Deprecated
+    daunhat,
+    @Deprecated
+    ditnhat,
+    de,
+    lo,
+    xien,
+    xien2,
+    xien3,
+    xien4,
+    bacang,
+    unknown;
+
+    public static LotoType convert(String type) {
+
+        switch (type) {
+            case "de":
+                return de;
+
+            case "lo":
+                return lo;
+
+            case "xq 2":
+            case "xien2":
+                return xien2;
+
+            case "xq 3":
+            case "xien3":
+                return xien3;
+
+            case "xq 4":
+            case "xien4":
+                return xien4;
+
+            case "bacang":
+                return bacang;
+
+            default:
+                return unknown;
+        }
+    }
+}

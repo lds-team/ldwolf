@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RadioGroup xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/number_filter_group"
+    style="@style/DialogChooser"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/dialog_bg"
+    android:orientation="vertical">
+
+    <RadioButton
+        android:id="@+id/number_filter_dedit"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:checked="true"
+        android:text="Đề"
+        android:textSize="15sp"
+        android:textStyle="bold" />
+
+    <RadioButton
+        android:id="@+id/number_filter_xemlo"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:checked="false"
+        android:text="Xem lô"
+        android:textSize="15sp"
+        android:textStyle="bold" />
+
+    <RadioButton
+        android:id="@+id/number_filter_xemxien"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:checked="false"
+        android:text="Xem xiên"
+        android:textSize="15sp"
+        android:textStyle="bold" />
+
+    <RadioButton
+        android:id="@+id/number_filter_dedau"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:checked="false"
+        android:text="Đề đầu DB"
+        android:textSize="15sp"
+        android:textStyle="bold"
+        android:visibility="gone" />
+
+    <RadioButton
+        android:id="@+id/number_filter_dedaunhat"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:checked="false"
+        android:text="Đề đầu Giải Nhất"
+        android:textSize="15sp"
+        android:textStyle="bold"
+        android:visibility="gone" />
+
+    <RadioButton
+        android:id="@+id/number_filter_deditnhat"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:checked="false"
+        android:text="Đề đít Giải Nhất"
+        android:textSize="15sp"
+        android:textStyle="bold"
+        android:visibility="gone" />
+
+    <RadioButton
+        android:id="@+id/number_filter_bacang"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:checked="false"
+        android:text="Ba Càng"
+        android:textSize="15sp"
+        android:textStyle="bold" />
+</RadioGroup>

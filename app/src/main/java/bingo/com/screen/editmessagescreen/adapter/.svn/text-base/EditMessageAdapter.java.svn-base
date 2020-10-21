@@ -1,0 +1,148 @@
+package bingo.com.screen.editmessagescreen.adapter;
+
+import android.content.Context;
+import android.database.Cursor;
+import android.support.v7.widget.RecyclerView;
+import android.text.SpannableString;
+import android.text.Spanned;
+import android.text.TextUtils;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.EditText;
+import android.widget.Spinner;
+import android.widget.TextView;
+
+import bingo.com.R;
+import bingo.com.base.baseadapter.BaseCursorRecyclerAdapter;
+import bingo.com.base.baseview.BaseRecyclerViewHolder;
+import bingo.com.helperdb.MessageDBHelper;
+import bingo.com.helperdb.db.MessageDatabase;
+import bingo.com.model.ChooseMessage;
+import bingo.com.utils.Formats;
+import bingo.com.utils.Utils;
+import butterknife.Bind;
+
+/**
+ * Created by kazinguyen on 6/19/17.
+ */
+public class EditMessageAdapter extends BaseCursorRecyclerAdapter<EditMessageAdapter.ViewHolder> {
+
+    private Context context;
+
+    private EditText textSelect;
+
+    public ChooseMessage chooseMessage;
+
+    private Spinner customer;
+
+    public boolean clickable = true;
+
+    public EditMessageAdapter(Context context, Cursor cursor, EditText textSelect, Spinner customer) {
+        super(context, cursor);
+
+        this.context = context;
+        this.textSelect = textSelect;
+        this.customer = customer;
+    }
+
+    @Override
+    public void onBindViewHolder(ViewHolder viewHolder, Cursor cursor) {
+        String content = cursor.getString(cursor.getColumnIndex(MessageDatabase.CONTENT));
+
+        viewHolder.setData(content);
+    }
+
+    @Override
+    public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        View view = View.inflate(context, R.layout.simple_list_item_1, null);
+
+        view.setLayoutParams(new RecyclerView.LayoutParams(RecyclerView.LayoutParams.MATCH_PARENT, RecyclerView.LayoutParams.WRAP_CONTENT));
+
+        return new ViewHolder(view);
+    }
+
+    public void setClickable(boolean clickable) {
+        this.clickable = clickable;
+    }
+
+    class ViewHolder extends BaseRecyclerViewHolder {
+
+        @Bind(android.R.id.text1)
+        TextView textView;
+
+        public ViewHolder(final View itemView) {
+            super(itemView);
+
+            itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+
+                    if (clickable)
+                    {
+                        getCursor().moveToPosition(getLayoutPosition());
+
+                        String content = getCursor().getString(getCursor().getColumnIndex(MessageDatabase.CONTENT));
+
+                        /*String error = getCursor().getString(getCursor().getColumnIndex(MessageDatabase.ERROR))*/;
+
+                        Spanned last = Formats.getError(content);
+
+                        if (TextUtils.isEmpty(last))
+                        {
+                            last = new SpannableString(content);
+                        }
+
+                        textSelect.setText(last);
+                        textSelect.requestFocus();
+
+                        chooseMessage = new ChooseMessage(
+                                getCursor().getString(getCursor().getColumnIndex(MessageDatabase.NAME)),
+                                getCursor().getString(getCursor().getColumnIndex(MessageDatabase.PHONE)),
+                                getCursor().getString(getCursor().getColumnIndex(MessageDatabase.TIME)),
+                                getCursor().getString(getCursor().getColumnIndex(MessageDatabase.CONTENT)),
+                                getCursor().getString(getCursor().getColumnIndex(MessageDatabase.TYPE))
+                        );
+
+                        setCustomerSelection(chooseMessage.getPhone());
+                    }
+                }
+            });
+
+            itemView.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View v) {
+                    Utils.showAlertTwoButton(context, null, "Xóa tin nhắn?", "Xóa", "Không", new Runnable() {
+                        @Override
+                        public void run() {
+                            getCursor().moveToPosition(getLayoutPosition());
+                            String phone = getCursor().getString(getCursor().getColumnIndex(MessageDatabase.PHONE));
+                            String time = getCursor().getString(getCursor().getColumnIndex(MessageDatabase.TIME));
+
+                            MessageDBHelper.deleteMessage(phone, time);
+
+                            requestUpdate();
+                        }
+                    }, null);
+                    return true;
+                }
+            });
+        }
+
+        private void setCustomerSelection(String phone) {
+            for (int i = 0; i < customer.getCount(); i++)
+            {
+                ((Cursor) customer.getAdapter().getItem(i)).moveToPosition(i);
+                if (((Cursor) customer.getAdapter().getItem(i)).getString(
+                        ((Cursor) customer.getAdapter().getItem(i)).getColumnIndex(MessageDatabase.PHONE)).equals(phone))
+                {
+                    customer.setSelection(i);
+                    return;
+                }
+            }
+        }
+
+        public void setData(String content) {
+            textView.setText(content);
+        }
+    }
+}

@@ -1,0 +1,244 @@
+package bingo.com.screen.numberreport.adapter;
+
+import android.app.Dialog;
+import android.content.ClipData;
+import android.content.ClipboardManager;
+import android.content.Context;
+import android.content.Intent;
+import android.database.Cursor;
+import android.net.Uri;
+import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
+import android.util.Log;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.TextView;
+
+import bingo.com.R;
+import bingo.com.async.TaskHelper;
+import bingo.com.base.baseadapter.BaseCursorRecyclerAdapter;
+import bingo.com.base.baseview.BaseRecyclerViewHolder;
+import bingo.com.customviews.ResultView;
+import bingo.com.helperdb.CongnoDBHelper;
+import bingo.com.helperdb.FollowDBHelper;
+import bingo.com.helperdb.MessageDBHelper;
+import bingo.com.helperdb.db.CongnoDatabase;
+import bingo.com.helperdb.db.FollowDatabase;
+import bingo.com.utils.Keysaved;
+import bingo.com.utils.Utils;
+import butterknife.Bind;
+
+/**
+ * Created by kazinguyen on 6/15/17.
+ */
+public class CustomerAdapter extends BaseCursorRecyclerAdapter<CustomerAdapter.ViewHolder> {
+
+    private Context context;
+
+    public CustomerAdapter(Context context, Cursor cursor) {
+        super(context, cursor);
+
+        this.context = context;
+    }
+
+    @Override
+    public void onBindViewHolder(ViewHolder viewHolder, Cursor cursor) {
+        String messageType = cursor.getString(cursor.getColumnIndex(FollowDatabase.DETAIL_MESSAGE_TYPE));
+
+        viewHolder.setValue(
+                cursor.getString(cursor.getColumnIndex(FollowDatabase.DETAIL_NAME)),
+                cursor.getString(cursor.getColumnIndex(FollowDatabase.DETAIL_PHONE)),
+                messageType,
+                FollowDBHelper.getSumAllParentTypeWithPhoneAndType(
+                        cursor.getString(cursor.getColumnIndex(FollowDatabase.DETAIL_PHONE)),
+                        messageType)
+        );
+    }
+
+    @Override
+    public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        View view = View.inflate(context, R.layout.item_customadapter, null);
+        view.setLayoutParams(new RecyclerView.LayoutParams(RecyclerView.LayoutParams.MATCH_PARENT, RecyclerView.LayoutParams.WRAP_CONTENT));
+
+        return new ViewHolder(view);
+    }
+
+    class ViewHolder extends BaseRecyclerViewHolder implements View.OnClickListener {
+
+        @Bind(R.id.customadapter_name)
+        TextView name;
+
+        @Bind(R.id.customadapter_result)
+        ResultView result;
+
+        private Dialog chooser;
+
+        public ViewHolder(View itemView) {
+            super(itemView);
+
+            initChooser();
+
+            itemView.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View v) {
+                    chooser.show();
+
+                    return true;
+                }
+            });
+        }
+
+        private void setValue(String name, String phone, String messageType, Cursor cursor) {
+            this.name.setText(name);
+            addToResult(cursor, phone, messageType, "parenttype","sumpoint", "sumpointwin", "summoney");
+        }
+
+        private void initChooser() {
+            chooser = Utils.createDialog(context, R.layout.dialog_choosermenu, false);
+
+            chooser.findViewById(R.id.choosermenu_1).setOnClickListener(this);
+            chooser.findViewById(R.id.choosermenu_2).setOnClickListener(this);
+            chooser.findViewById(R.id.choosermenu_3).setOnClickListener(this);
+            chooser.findViewById(R.id.choosermenu_4).setOnClickListener(this);
+        }
+
+        public void addToResult(Cursor cursor, String phone, String messageType, String... columns) {
+
+            result.removeAllViews();
+
+            double sum = 0;
+
+            if (cursor != null)
+            {
+                for (int i = 0; i < cursor.getCount(); i++)
+                {
+                    cursor.moveToPosition(i);
+
+                    String type = cursor.getString(cursor.getColumnIndex(columns[0]));
+
+
+                    double nhanReceived = cursor.getDouble(cursor.getColumnIndex(columns[1]));
+                    double anReceived = cursor.getDouble(cursor.getColumnIndex(columns[2]));
+                    double money = cursor.getDouble(cursor.getColumnIndex(columns[3]));
+
+                    /*//TODO bug on sql query when sum. That is hot fix.
+                    nhanReceived = FollowDBHelper.getSumReceivedValueOfPhone(type, phone);
+                    anReceived = FollowDBHelper.getSumGuestWinByTypeOfPhone(type, phone);*/
+
+                    //---------------
+
+                    sum += (money);
+
+                    this.result.add(type,
+                            new double[]{
+                                    nhanReceived,
+                                    anReceived,
+                                    (money)
+                            });
+
+                    if (i == cursor.getCount() - 1)
+                    {
+                        result.addBottom(sum);
+                    }
+                }
+            }
+
+        }
+
+        @Override
+        public void onClick(View v) {
+            chooser.dismiss();
+
+            getCursor().moveToPosition(getLayoutPosition());
+            String phone = getCursor().getString(getCursor().getColumnIndex(FollowDatabase.DETAIL_PHONE));
+            String name = getCursor().getString(getCursor().getColumnIndex(FollowDatabase.DETAIL_NAME));
+
+            switch (v.getId())
+            {
+                case R.id.choosermenu_1:
+                    CongnoDBHelper.deleteCongNo(phone);
+                    new TaskHelper.TaskLoadResultToDB(context, phone).execute();
+                    break;
+
+                case R.id.choosermenu_2:
+                    String mes = getMessageChotTien(phone);
+                    sendMessage(phone, mes);
+                    break;
+
+                case R.id.choosermenu_3:
+                    String message = getMessageChotTien(phone);
+                    copyMessage(message);
+                    break;
+
+                case R.id.choosermenu_4:
+                    MessageDBHelper.deleteDataUser(
+                            phone,
+                            Utils.getCurrentDate());
+
+                    requestUpdate();
+                    break;
+
+                default:break;
+            }
+        }
+
+        private void sendMessage(String phone, String mes) {
+            if (!TextUtils.isEmpty(mes))
+            {
+                Intent sendIntent = new Intent(Intent.ACTION_VIEW);
+                sendIntent.putExtra("sms_body", mes);
+                sendIntent.setData(Uri.parse("sms:" + phone));
+                context.startActivity(sendIntent);
+            }
+        }
+
+        private void copyMessage(String mes) {
+            if (!TextUtils.isEmpty(mes))
+            {
+                ClipboardManager manager = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
+                ClipData data = ClipData.newPlainText(Keysaved.CLIPBOARD_BINGO, mes);
+                manager.setPrimaryClip(data);
+            }
+        }
+
+        private String getMessageChotTien(String phone) {
+
+            String date = Utils.getCurrentDate();
+
+            Cursor cursor = CongnoDBHelper.getCongNoByPhone(phone);
+
+            try {
+
+                if (cursor != null && cursor.moveToFirst())
+                {
+                    String mes = date.concat("\n");
+                    int sum = 0;
+
+                    while (!cursor.isAfterLast())
+                    {
+                        String type = cursor.getString(cursor.getColumnIndex(CongnoDatabase.DETAIL_TYPE));
+                        String point = cursor.getString(cursor.getColumnIndex(CongnoDatabase.DETAIL_POINT));
+                        String pointWin = cursor.getString(cursor.getColumnIndex(CongnoDatabase.DETAIL_POINT_WIN));
+                        int money = cursor.getInt(cursor.getColumnIndex(CongnoDatabase.DETAIL_MONEY));
+                        sum += money;
+
+                        mes = mes.concat(type).concat(": ").concat(point).concat("(").concat(pointWin).concat(")").concat(" = ").concat(String.valueOf(money)).concat("\n");
+
+                        cursor.moveToNext();
+                    }
+
+                    mes = mes.concat("Tong: ").concat(String.valueOf(sum));
+
+                    Log.d("CustomerAdapter", "MessageChot: " + mes);
+
+                    return mes;
+                }
+
+            } finally {
+                cursor.close();
+            }
+
+            return null;
+        }
+    }
+}

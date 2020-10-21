@@ -1,0 +1,95 @@
+package bingo.com.async;
+
+import android.os.Handler;
+import android.os.Looper;
+import android.support.annotation.NonNull;
+import android.util.Log;
+
+import java.util.List;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
+/**
+ * Created by KaziNguyen on 26/06/2017.
+ */
+public class CommonTask {
+
+    public static class ThreadTask extends Thread {
+
+        public ThreadTask(Runnable target) {
+            super(target);
+        }
+
+        @Override
+        public synchronized void start() {
+            super.start();
+
+            Log.d("SavedConfigThread", "Starting save Config.");
+        }
+    }
+
+    public static class AsyncSingleThread {
+
+        //TODO Suggest use only once thread in pool. Temporary 3.
+        private ExecutorService eventAsync = Executors.newSingleThreadExecutor();
+        private Executor eventMain = new MainThreadExecutor();
+
+        private static AsyncSingleThread instance;
+
+        public void clean() {
+
+        }
+
+        public void stop() {
+            eventAsync.shutdown();
+        }
+
+        private void forceStop() {
+            List<Runnable> feature = eventAsync.shutdownNow();
+
+        }
+
+        protected AsyncSingleThread() {
+
+        }
+
+        public static AsyncSingleThread get() {
+            synchronized (AsyncSingleThread.class)
+            {
+                if (instance == null)
+                    instance = new AsyncSingleThread();
+            }
+
+            return instance;
+        }
+
+        public AsyncSingleThread execute(Runnable... taskAsync) {
+            for (Runnable task: taskAsync)
+            {
+                /*eventAsync.submit(task);*/ //TODO
+                new ThreadTask(task).start();
+            }
+
+            return this;
+        }
+
+        public AsyncSingleThread executeOnMain(Runnable... taskMain) {
+            for (Runnable task: taskMain)
+            {
+                eventMain.execute(task);
+            }
+
+            return this;
+        }
+    }
+
+    private static class MainThreadExecutor implements Executor {
+        private final Handler handler = new Handler(Looper.getMainLooper());
+
+        @Override
+        public void execute(@NonNull Runnable runnable) {
+            handler.post(runnable);
+        }
+    }
+}

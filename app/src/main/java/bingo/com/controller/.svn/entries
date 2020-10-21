@@ -1,0 +1,77 @@
+10
+
+dir
+0
+https://nvan@124.158.1.28:8443/svn/BINGO/BingoNew/BingoNew/app/src/main/java/bingo/com/controller
+https://nvan@124.158.1.28:8443/svn/BINGO
+add
+
+
+
+
+
+
+
+svn:special svn:externals svn:needs-lock
+
+
+
+
+
+
+
+
+
+
+
+73f67ac8-a5ec-5046-a2f0-75f85d8cca8c
+
+ConfigControl.java
+file
+
+
+
+add
+
+DeleteController.java
+file
+
+
+
+add
+
+InsertController.java
+file
+
+
+
+add
+
+InsertControllerBackUp.java
+file
+
+
+
+add
+
+ResultUpdate.java
+file
+
+
+
+add
+
+UpdateController.java
+file
+
+
+
+add
+
+wrapper
+dir
+
+
+
+add
+

@@ -1,0 +1,9 @@
+package bingo.com.utils;
+
+/**
+ * Created by KaziNguyen on 10/07/2017.
+ */
+public class ErrorLog {
+
+    public static final String NOT_SUPPORT_XIEN = "Không hỗ trợ giữ tin nhắn xiên.";
+}

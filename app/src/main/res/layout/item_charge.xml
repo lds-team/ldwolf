@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/text_itembg"
+    android:gravity="center_vertical"
+    android:minHeight="40dp"
+    android:orientation="horizontal">
+
+    <TextView
+        android:id="@+id/item_charge_name"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="2"
+        android:padding="5dp"
+        android:textAlignment="viewStart" />
+
+    <bingo.com.customviews.TextViewDegit
+        android:id="@+id/item_charge_nocu"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="0"
+        android:maxLines="1"
+        android:textAlignment="center" />
+
+    <bingo.com.customviews.TextViewDegit
+        android:id="@+id/item_charge_phatsinh"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="0"
+        android:maxLines="1"
+        android:textAlignment="viewEnd" />
+
+    <bingo.com.customviews.TextViewDegit
+        android:id="@+id/item_charge_socuoi"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:maxLines="1"
+        android:padding="5dp"
+        android:textAlignment="viewEnd" />
+</LinearLayout>

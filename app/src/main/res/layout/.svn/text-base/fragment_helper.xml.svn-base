@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="5dp"
+            android:text="I. Sửa tin nhắn không hiểu: "
+            android:textColor="@android:color/black"
+            android:textStyle="bold" />
+
+        <Switch
+            android:id="@+id/helper_switch1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:checked="false"
+            android:padding="5dp" />
+    </RelativeLayout>
+
+    <TextView
+        android:id="@+id/helper_guide1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="10dp"
+        android:text="Hướng dẫn sử dụng app."
+        android:textSize="14sp"
+        android:visibility="gone" />
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="5dp"
+            android:text="II. Báo cáo số: "
+            android:textColor="@android:color/black"
+            android:textStyle="bold" />
+
+        <Switch
+            android:id="@+id/helper_switch2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:checked="false"
+            android:padding="5dp" />
+    </RelativeLayout>
+
+    <TextView
+        android:id="@+id/helper_guide2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="10dp"
+        android:text="Hướng dẫn sử dụng app."
+        android:textSize="14sp"
+        android:visibility="gone" />
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="5dp"
+            android:text="III. Báo cáo tiền: "
+            android:textColor="@android:color/black"
+            android:textStyle="bold" />
+
+        <Switch
+            android:id="@+id/helper_switch3"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:checked="false"
+            android:padding="5dp" />
+    </RelativeLayout>
+
+    <TextView
+        android:id="@+id/helper_guide3"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="10dp"
+        android:text="Hướng dẫn sử dụng app."
+        android:textSize="14sp"
+        android:visibility="gone" />
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="5dp"
+            android:text="IV. Cài đặt: "
+            android:textColor="@android:color/black"
+            android:textStyle="bold" />
+
+        <Switch
+            android:id="@+id/helper_switch4"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:checked="false"
+            android:padding="5dp" />
+    </RelativeLayout>
+
+    <TextView
+        android:id="@+id/helper_guide4"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="10dp"
+        android:text="Hướng dẫn sử dụng app."
+        android:textSize="14sp"
+        android:visibility="gone" />
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="5dp"
+            android:text="V. Database: "
+            android:textColor="@android:color/black"
+            android:textStyle="bold" />
+
+        <Switch
+            android:id="@+id/helper_switch5"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:checked="false"
+            android:padding="5dp" />
+    </RelativeLayout>
+
+    <TextView
+        android:id="@+id/helper_guide5"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="10dp"
+        android:text="Hướng dẫn sử dụng app."
+        android:textSize="14sp"
+        android:visibility="gone" />
+</LinearLayout>

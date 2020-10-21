@@ -1,0 +1,72 @@
+package bingo.com.screen.congno.adapter;
+
+import android.content.Context;
+import android.database.Cursor;
+import android.support.v7.widget.RecyclerView;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.TextView;
+
+import bingo.com.R;
+import bingo.com.base.baseadapter.BaseCursorRecyclerAdapter;
+import bingo.com.base.baseview.BaseRecyclerViewHolder;
+import bingo.com.customviews.HistoryView;
+import bingo.com.helperdb.CongnoDBHelper;
+import bingo.com.helperdb.db.CongnoDatabase;
+import butterknife.Bind;
+
+/**
+ * Created by kazinguyen on 7/15/17.
+ */
+public class HistoryAdapter extends BaseCursorRecyclerAdapter<HistoryAdapter.ViewHolder> {
+
+    private Context context;
+
+    public HistoryAdapter(Context context, Cursor cursor) {
+        super(context, cursor);
+
+        this.context = context;
+    }
+
+    @Override
+    public void onBindViewHolder(ViewHolder viewHolder, Cursor cursor) {
+        String date = cursor.getString(cursor.getColumnIndex(CongnoDatabase.DETAIL_DATE));
+        String phone = cursor.getString(cursor.getColumnIndex(CongnoDatabase.DETAIL_PHONE));
+
+        Cursor c = CongnoDBHelper.getCongNoHistory(phone, date);
+
+        try
+        {
+            viewHolder.setData(date, c, CongnoDatabase.DETAIL_TYPE, CongnoDatabase.DETAIL_POINT, CongnoDatabase.DETAIL_MONEY);
+        }
+        finally {
+            c.close();
+        }
+    }
+
+    @Override
+    public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        View view = View.inflate(context, R.layout.item_history, null);
+        view.setLayoutParams(new RecyclerView.LayoutParams(RecyclerView.LayoutParams.MATCH_PARENT, RecyclerView.LayoutParams.WRAP_CONTENT));
+
+        return new ViewHolder(view);
+    }
+
+    static class ViewHolder extends BaseRecyclerViewHolder {
+
+        @Bind(R.id.item_history_date)
+        TextView date;
+
+        @Bind(R.id.item_history_view)
+        HistoryView history;
+
+        public ViewHolder(View itemView) {
+            super(itemView);
+        }
+
+        public void setData(String date, Cursor cursor, String... column) {
+            this.date.setText(date);
+            this.history.addAlls(cursor, column);
+        }
+    }
+}

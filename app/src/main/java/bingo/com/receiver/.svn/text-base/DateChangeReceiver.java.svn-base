@@ -1,0 +1,41 @@
+package bingo.com.receiver;
+
+import android.content.Context;
+import android.content.Intent;
+import android.text.TextUtils;
+
+import java.util.Calendar;
+
+import bingo.com.base.BaseReceiver;
+import bingo.com.model.ResultReturnModel;
+import bingo.com.pref.ConfigPreference;
+import bingo.com.utils.Constant;
+import bingo.com.utils.StatisticControlImport;
+
+/**
+ * Created by kazinguyen on 7/27/17.
+ */
+public class DateChangeReceiver extends BaseReceiver {
+
+    @Override
+    public void onReceive(Context context, Intent intent) {
+
+        ResultReturnModel[] result = StatisticControlImport.getResultTodayAndYesterday(context);
+
+        String messageDe = ConfigPreference.getMessageGiuDe(getSaved(context));
+
+        if (!TextUtils.isEmpty(messageDe))
+        {
+            StatisticControlImport.importSuadan(Constant.UNKNOWN_NAME, messageDe, String.valueOf(Calendar.getInstance().getTimeInMillis()), result);
+        }
+
+
+        String messageLo = ConfigPreference.getMessageGiuLo(getSaved(context));
+
+        if (!TextUtils.isEmpty(messageLo))
+        {
+            StatisticControlImport.importSuadan(Constant.UNKNOWN_NAME, messageLo, String.valueOf(Calendar.getInstance().getTimeInMillis()), result);
+        }
+
+    }
+}

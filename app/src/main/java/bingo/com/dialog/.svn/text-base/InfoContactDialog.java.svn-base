@@ -1,0 +1,206 @@
+package bingo.com.dialog;
+
+import android.content.Context;
+import android.database.Cursor;
+import android.view.View;
+import android.widget.EditText;
+import android.widget.RadioButton;
+import android.widget.TextView;
+
+import bingo.com.R;
+import bingo.com.base.baseview.BaseDialog;
+import bingo.com.helperdb.ContactDBHelper;
+import bingo.com.helperdb.db.ContactDatabase;
+import butterknife.Bind;
+import butterknife.OnClick;
+
+/**
+ * Created by kazinguyen on 6/17/17.
+ */
+public class InfoContactDialog extends BaseDialog implements View.OnClickListener {
+
+    @Bind(R.id.contactinfo_name)
+    TextView name;
+
+    @Bind(R.id.contactinfo_number)
+    TextView number;
+
+    @Deprecated
+    @Bind(R.id.contactinfo_daudb)
+    EditText daudb;
+
+    @Deprecated
+    @Bind(R.id.contactinfo_daudb_lanan)
+    EditText lanan_Daudb;
+
+    @Bind(R.id.contactinfo_ditdb)
+    EditText ditdb;
+
+    @Bind(R.id.contactinfo_ditdb_lanan)
+    EditText lanan_Ditdb;
+
+    @Deprecated
+    @Bind(R.id.contactinfo_daunhat)
+    EditText daunhat;
+
+    @Deprecated
+    @Bind(R.id.contactinfo_daunhat_lanan)
+    EditText lanan_daunhat;
+
+    @Deprecated
+    @Bind(R.id.contactinfo_ditnhat)
+    EditText ditnhat;
+
+    @Deprecated
+    @Bind(R.id.contactinfo_ditnhat_lanan)
+    EditText lananDitnhat;
+
+    @Bind(R.id.contactinfo_lo)
+    EditText lo;
+
+    @Bind(R.id.contactinfo_lo_lanan)
+    EditText lanan_lo;
+
+    @Bind(R.id.contactinfo_xien2)
+    EditText xien2;
+
+    @Bind(R.id.contactinfo_xien2_lanan)
+    EditText lanan_xien2;
+
+    @Bind(R.id.contactinfo_xien3)
+    EditText xien3;
+
+    @Bind(R.id.contactinfo_xien3_lanan)
+    EditText lanan_xien3;
+
+    @Bind(R.id.contactinfo_xien4)
+    EditText xien4;
+
+    @Bind(R.id.contactinfo_xien4_lanan)
+    EditText lanan_xien4;
+
+    @Bind(R.id.contactinfo_3cang)
+    EditText bacang;
+
+    @Bind(R.id.contactinfo_3cang_lanan)
+    EditText lanan_bacang;
+
+    @Bind(R.id.contactinfo_khach)
+    RadioButton khach;
+
+    @Bind(R.id.contactinfo_chu)
+    RadioButton chu;
+
+    private EditText[] arrFields;
+
+    public InfoContactDialog(Context context, boolean notCancel) {
+        super(context, notCancel);
+
+        arrFields = new EditText[]{
+                daudb, lanan_Daudb,
+                ditdb, lanan_Ditdb,
+                daunhat, lanan_daunhat,
+                ditnhat, lananDitnhat,
+                lo, lanan_lo,
+                xien2, lanan_xien2,
+                xien3, lanan_xien3,
+                xien4, lanan_xien4,
+                bacang, lanan_bacang
+        };
+    }
+
+    public void setSingleData(String name, String phone) {
+        this.name.setText(name);
+        this.number.setText(phone);
+        khach.setChecked(true);
+    }
+
+    public void setSingleData(Cursor cursor, int nameIndex, int numberIndex, int typeIndex, String... columns) {
+        try {
+            if (cursor != null)
+            {
+                name.setText(cursor.getString(nameIndex));
+                number.setText(cursor.getString(numberIndex));
+                setTypeSelected(cursor.getString(typeIndex));
+
+                for (int i = 0; i < columns.length; i++)
+                {
+                    arrFields[i].setText(cursor.getString(cursor.getColumnIndex(columns[i])));
+                }
+            }
+        } catch (IndexOutOfBoundsException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void setTypeSelected(String typeSelected) {
+        if (typeSelected.equals(ContactDatabase.TYPE_CHU_NHAN_SO))
+        {
+            chu.setChecked(true);
+            khach.setChecked(false);
+        }
+        else
+        {
+            chu.setChecked(false);
+            khach.setChecked(true);
+        }
+    }
+
+    private String geTypeSelected() {
+        if (chu.isChecked())
+            return ContactDatabase.TYPE_CHU_NHAN_SO;
+        else
+            return ContactDatabase.TYPE_KHACH_CHUYEN_SO;
+    }
+
+    private String[] getStringEditted() {
+        String[] strings = new String[arrFields.length];
+
+        for (int i = 0; i < arrFields.length; i++)
+        {
+            strings[i] = arrFields[i].getText().toString();
+        }
+
+        return strings;
+    }
+
+    @Override
+    public int layout() {
+        return R.layout.dialog_contactinfo;
+    }
+
+    @Override
+    public void dismissed() {
+        requestUpdate();
+        releaseViews();
+    }
+
+    @OnClick({R.id.contactinfo_delete, R.id.contactinfo_add})
+    @Override
+    public void onClick(View v) {
+        loadingAnim();
+
+        switch (v.getId())
+        {
+            case R.id.contactinfo_delete:
+                ContactDBHelper.deleteContact(number.getText().toString());
+                break;
+
+            case R.id.contactinfo_add:
+                ContactDBHelper.addContactWithOnConflict(number.getText().toString(), name.getText().toString(), geTypeSelected(), getStringEditted());
+
+                /*CommonTask.AsyncSingleThread.get().execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        TempleMessageHelper.importTempleMessage(number.getText().toString(), 0);
+                    }
+                }).clean();*/
+                break;
+
+            default:break;
+        }
+
+        dismissAnim();
+        dismiss();
+    }
+}

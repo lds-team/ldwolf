@@ -1,0 +1,34 @@
+package bingo.com.pref;
+
+import android.content.SharedPreferences;
+
+/**
+ * Created by kazinguyen on 6/18/17.
+ */
+public class ConfigPreference {
+
+    public static final String KEEP_DE_MESSAGE = "KEEP_DE_MESSAGE";
+    public static final String KEEP_LO_MESSAGE = "KEEP_LO_MESSAGE";
+
+    public static void saveMessageGiuDe(SharedPreferences pref, String message) {
+        SharedPreferences.Editor editor = pref.edit();
+        editor.putString(KEEP_DE_MESSAGE, message);
+        editor.apply();
+    }
+
+    public static String getMessageGiuDe(SharedPreferences pref) {
+
+        return pref.getString(KEEP_DE_MESSAGE, "");
+    }
+
+    public static void saveMessageGiuLo(SharedPreferences pref, String message) {
+        SharedPreferences.Editor editor = pref.edit();
+        editor.putString(KEEP_LO_MESSAGE, message);
+        editor.apply();
+    }
+
+    public static String getMessageGiuLo(SharedPreferences pref) {
+
+        return pref.getString(KEEP_LO_MESSAGE, "");
+    }
+}

@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="2dp"
+        android:background="@android:color/black" />
+
+    <LinearLayout
+        android:id="@+id/resultview_linear"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <bingo.com.customviews.TextViewDegit
+            style="@style/TextStyleCustomerTable"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="3"
+            android:text="Tổng: "
+            android:textAlignment="viewStart" />
+
+        <bingo.com.customviews.TextViewDegit
+            android:id="@+id/resultview_sum1"
+            style="@style/TextStyleCustomerTable"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1.5"
+            android:textAlignment="viewEnd" />
+
+        <bingo.com.customviews.TextViewDegit
+            android:id="@+id/resultview_sum2"
+            style="@style/TextStyleCustomerTable"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1.5"
+            android:textAlignment="viewEnd" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/resultview_socuoi"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/resultview_linear"
+        android:visibility="gone"
+        android:orientation="horizontal">
+
+        <bingo.com.customviews.TextViewDegit
+            style="@style/TextStyleCustomerTable"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="3"
+            android:text="Số cuối: "
+            android:textAlignment="viewStart" />
+
+        <bingo.com.customviews.TextViewDegit
+            android:id="@+id/resultview_sum3"
+            style="@style/TextStyleCustomerTable"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="3"
+            android:textAlignment="viewEnd"
+            android:textStyle="bold" />
+    </LinearLayout>
+</RelativeLayout>

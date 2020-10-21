@@ -1,0 +1,24 @@
+package bingo.com.model;
+
+
+import bingo.com.enumtype.TypeMessage;
+
+/**
+ * Created by kazinguyen on 4/7/17.
+ */
+public interface StatisticInfoModel {
+
+    String getName();
+
+    String getPhone();
+
+    String getRawMessage();
+
+    String getMessageEditted();
+
+    String getTime();
+
+    TypeMessage getType();
+
+    ContactModel getConfig();
+}

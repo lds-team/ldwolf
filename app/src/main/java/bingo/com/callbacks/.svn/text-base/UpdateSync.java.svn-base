@@ -1,0 +1,8 @@
+package bingo.com.callbacks;
+
+/**
+ * Created by kazinguyen on 6/21/17.
+ */
+public interface UpdateSync {
+    void onUpdate();
+}

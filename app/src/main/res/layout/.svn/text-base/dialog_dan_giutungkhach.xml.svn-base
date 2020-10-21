@@ -1,0 +1,363 @@
+<?xml version="1.0" encoding="utf-8"?><!--<merge>-->
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/giuso_type_giukhach"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:visibility="gone">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@android:color/darker_gray"
+        android:padding="5dp"
+        android:text="Giữ số từng khách: (%)"
+        android:textColor="@android:color/white"
+        android:textStyle="bold" />
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="60dp">
+
+        <Spinner
+            android:id="@+id/giutungkhach_spin"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:background="@drawable/spinner_bg"
+            android:spinnerMode="dropdown"
+            android:verticalScrollbarPosition="right" />
+
+        <ImageView
+            android:layout_width="60dp"
+            android:layout_height="50dp"
+            android:layout_alignParentRight="true"
+            android:background="@drawable/drop"
+            android:contentDescription="@null" />
+    </RelativeLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_weight="1"
+            android:padding="5dp"
+            android:text="Giữ đề:" />
+
+        <EditText
+            android:id="@+id/giutungkhach_seek1"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_weight="1.5"
+            android:inputType="numberSigned"
+            android:max="100"
+            android:maxLength="4"
+            android:progress="0"
+            android:thumb="@drawable/shape_seek_bar_text_thumb"
+            android:thumbOffset="4dp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:text="%" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_marginLeft="10dp"
+            android:layout_weight="1"
+            android:padding="5dp"
+            android:text="Max:" />
+
+        <EditText
+            android:id="@+id/giutungkhach_max1"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_weight="1.5"
+            android:inputType="numberSigned"
+            android:max="100"
+            android:progress="0"
+            android:thumb="@drawable/shape_seek_bar_text_thumb"
+            android:thumbOffset="4dp" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_weight="1"
+            android:padding="5dp"
+            android:text="Giữ lô:" />
+
+        <EditText
+            android:id="@+id/giutungkhach_seek2"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_weight="1.5"
+            android:inputType="numberSigned"
+            android:max="100"
+            android:maxLength="4"
+            android:progress="0"
+            android:thumb="@drawable/shape_seek_bar_text_thumb"
+            android:thumbOffset="4dp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:text="%" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_marginLeft="10dp"
+            android:layout_weight="1"
+            android:padding="5dp"
+            android:text="Max:" />
+
+        <EditText
+            android:id="@+id/giutungkhach_max2"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_weight="1.5"
+            android:inputType="numberSigned"
+            android:max="100"
+            android:progress="0"
+            android:thumb="@drawable/shape_seek_bar_text_thumb"
+            android:thumbOffset="4dp" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_weight="1"
+            android:padding="5dp"
+            android:text="Giữ xiên2:" />
+
+        <EditText
+            android:id="@+id/giutungkhach_seek3"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_weight="1.5"
+            android:inputType="numberSigned"
+            android:max="100"
+            android:maxLength="4"
+            android:progress="0"
+            android:thumb="@drawable/shape_seek_bar_text_thumb"
+            android:thumbOffset="4dp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:text="%" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_marginLeft="10dp"
+            android:layout_weight="1"
+            android:padding="5dp"
+            android:text="Max:" />
+
+        <EditText
+            android:id="@+id/giutungkhach_max3"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_weight="1.5"
+            android:inputType="numberSigned"
+            android:max="100"
+            android:progress="0"
+            android:thumb="@drawable/shape_seek_bar_text_thumb"
+            android:thumbOffset="4dp" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_weight="1"
+            android:padding="5dp"
+            android:text="Giữ xiên3:" />
+
+        <EditText
+            android:id="@+id/giutungkhach_seek4"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_weight="1.5"
+            android:inputType="numberSigned"
+            android:max="100"
+            android:maxLength="4"
+            android:progress="0"
+            android:thumb="@drawable/shape_seek_bar_text_thumb"
+            android:thumbOffset="4dp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:text="%" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_marginLeft="10dp"
+            android:layout_weight="1"
+            android:padding="5dp"
+            android:text="Max:" />
+
+        <EditText
+            android:id="@+id/giutungkhach_max4"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_weight="1.5"
+            android:inputType="numberSigned"
+            android:max="100"
+            android:progress="0"
+            android:thumb="@drawable/shape_seek_bar_text_thumb"
+            android:thumbOffset="4dp" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_weight="1"
+            android:padding="5dp"
+            android:text="Giữ xiên4:" />
+
+        <EditText
+            android:id="@+id/giutungkhach_seek5"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_weight="1.5"
+            android:inputType="numberSigned"
+            android:max="100"
+            android:maxLength="4"
+            android:progress="0"
+            android:thumb="@drawable/shape_seek_bar_text_thumb"
+            android:thumbOffset="4dp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:text="%" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_marginLeft="10dp"
+            android:layout_weight="1"
+            android:padding="5dp"
+            android:text="Max:" />
+
+        <EditText
+            android:id="@+id/giutungkhach_max5"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_weight="1.5"
+            android:inputType="numberSigned"
+            android:max="100"
+            android:progress="0"
+            android:thumb="@drawable/shape_seek_bar_text_thumb"
+            android:thumbOffset="4dp" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_weight="1"
+            android:padding="5dp"
+            android:text="Giữ 3C:" />
+
+        <EditText
+            android:id="@+id/giutungkhach_seek6"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_weight="1.5"
+            android:inputType="numberSigned"
+            android:max="100"
+            android:maxLength="4"
+            android:progress="0"
+            android:thumb="@drawable/shape_seek_bar_text_thumb"
+            android:thumbOffset="4dp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:text="%" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_marginLeft="10dp"
+            android:layout_weight="1"
+            android:padding="5dp"
+            android:text="Max:" />
+
+        <EditText
+            android:id="@+id/giutungkhach_max6"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_weight="1.5"
+            android:inputType="numberSigned"
+            android:max="100"
+            android:progress="0"
+            android:thumb="@drawable/shape_seek_bar_text_thumb"
+            android:thumbOffset="4dp" />
+    </LinearLayout>
+
+    <Button
+        android:id="@+id/giutungkhach_giubtn"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Giữ % khách này"
+        android:textColor="@android:color/holo_red_dark" />
+</LinearLayout><!--</merge>-->

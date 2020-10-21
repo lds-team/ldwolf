@@ -1,0 +1,231 @@
+package bingo.com.helperdb;
+
+import android.content.ContentValues;
+import android.content.Context;
+import android.database.Cursor;
+
+import java.util.HashMap;
+
+import bingo.com.base.BaseDBHelper;
+import bingo.com.helperdb.db.ContactDatabase;
+import bingo.com.model.ContactModel;
+
+/**
+ * Created by kazinguyen on 6/17/17.
+ */
+public class ContactDBHelper extends BaseDBHelper {
+
+    private static ContactDatabase db;
+
+    public static ContactDatabase instance() {
+        return db;
+    }
+
+    public static void init(Context context) {
+        synchronized (ContactDBHelper.class)
+        {
+            if (db == null)
+            {
+                db = new ContactDatabase(context);
+            }
+        }
+    }
+
+    public static String[] getColumnsHeso() {
+        return db.columnsHeso;
+    }
+
+    public static boolean addContact(String phone, ContentValues values) {
+        if (db.isExist(phone))
+        {
+            return false;
+        }
+        else
+        {
+            putNullHesoGiu(values);
+            db.addContact(values);
+            return true;
+        }
+    }
+
+    public static boolean addContact(String phone, String name, String type, String... valuesMapsHesoColumns) {
+        if (db.isExist(phone))
+        {
+            return false;
+        }
+        else
+        {
+            if (valuesMapsHesoColumns.length != getColumnsHeso().length)
+                throw new IndexOutOfBoundsException("Not match Contact Columns Maps.");
+
+            ContentValues values = new ContentValues();
+            values.put(ContactDatabase.NAME, name);
+            values.put(ContactDatabase.PHONE, phone);
+            values.put(ContactDatabase.TYPE, type);
+
+            for (int i = 0; i < valuesMapsHesoColumns.length; i++)
+            {
+                values.put(db.columnsHeso[i], valuesMapsHesoColumns[i]);
+            }
+
+            putNullHesoGiu(values);
+
+            db.addContact(values);
+
+            return true;
+        }
+    }
+
+    public static void addContactWithOnConflict(String phone, String name, String type, String... valuesMapsHesoColumns) {
+
+        if (valuesMapsHesoColumns.length != getColumnsHeso().length)
+            throw new IndexOutOfBoundsException("Not match Contact Columns Maps.");
+
+        ContentValues values = new ContentValues();
+        values.put(ContactDatabase.NAME, name);
+        values.put(ContactDatabase.PHONE, phone);
+        values.put(ContactDatabase.TYPE, type);
+
+        for (int i = 0; i < valuesMapsHesoColumns.length; i++)
+        {
+            values.put(db.columnsHeso[i], valuesMapsHesoColumns[i]);
+        }
+
+        if (db.isExist(phone))
+        {
+            putNullHesoGiu(values);
+            db.updateContact(phone, values);
+        }
+        else
+        {
+            db.addContact(values);
+        }
+
+    }
+
+    private static void putNullHesoGiu(ContentValues values) {
+        values.put(ContactDatabase.GIU_DE, "0");
+        values.put(ContactDatabase.GIU_LO, "0");
+        values.put(ContactDatabase.GIU_BACANG, "0");
+        values.put(ContactDatabase.GIU_XIEN2, "0");
+        values.put(ContactDatabase.GIU_XIEN3, "0");
+        values.put(ContactDatabase.GIU_XIEN4, "0");
+        values.put(ContactDatabase.GIU_DIEM_XIEN2, "0");
+        values.put(ContactDatabase.GIU_DIEM_XIEN3, "0");
+        values.put(ContactDatabase.GIU_DIEM_XIEN4, "0");
+        values.put(ContactDatabase.GIU_DIEM_BACANG, "0");
+        values.put(ContactDatabase.MAX_DE, "0");
+        values.put(ContactDatabase.MAX_LO, "0");
+        values.put(ContactDatabase.MAX_XIEN2, "0");
+        values.put(ContactDatabase.MAX_XIEN3, "0");
+        values.put(ContactDatabase.MAX_XIEN4, "0");
+        values.put(ContactDatabase.MAX_BACANG, "0");
+    }
+
+    private static void putHesoGiu(ContentValues values, String[] column, String[] hesogiu) {
+
+        if (hesogiu.length != column.length)
+        {
+            throw new IndexOutOfBoundsException("Must map values key and value.");
+        }
+
+        for (int i = 0; i < column.length; i++)
+        {
+            values.put(column[i], hesogiu[i]);
+        }
+    }
+
+    public static void updateHesoGiu(String[] column, String[] hesogiu) {
+
+        ContentValues values = new ContentValues();
+
+        putHesoGiu(values, column, hesogiu);
+
+        db.updateAllContact(values);
+    }
+
+    public static void updateHesoGiu(String phone, String[] column, String[] hesogiu) {
+
+        ContentValues values = new ContentValues();
+
+        putHesoGiu(values, column, hesogiu);
+
+        db.updateContact(phone, values);
+    }
+
+    public static void updateContact(String phone, ContentValues values) {
+        db.updateContact(phone, values);
+    }
+
+    public static void updateContact(String phone, String[]... valuesMaps) {
+
+        ContentValues values = new ContentValues();
+
+        for (String[] valueMap : valuesMaps)
+        {
+            if (valueMap.length != 2)
+                throw new IndexOutOfBoundsException("Must 2 values key and map.");
+
+            values.put(valueMap[0], valueMap[1]);
+        }
+
+        db.updateContact(phone, values);
+    }
+
+    public static void updateContact(String phone, String name, String type, String... mappedValue) {
+
+        if (mappedValue.length != getColumnsHeso().length)
+            throw new IndexOutOfBoundsException("Must have array map.");
+
+        ContentValues values = new ContentValues();
+
+        for (int i = 0; i < mappedValue.length; i++)
+        {
+            values.put(db.columnsHeso[i], mappedValue[i]);
+        }
+
+        if (name != null)
+            values.put(ContactDatabase.NAME, name);
+
+        if (type != null)
+            values.put(ContactDatabase.TYPE, type);
+
+        db.updateContact(phone, values);
+    }
+
+    public static String getRandomPhone() {
+        return db.getRandomPhone();
+    }
+
+    public static void deleteContact(String phone) {
+        db.deleteContact(phone);
+    }
+
+    public static Cursor getAlls() {
+        return db.getAlls();
+    }
+
+    public static Cursor getAllsChuNhanSo() {
+        return db.getAlls(ContactDatabase.TYPE_CHU_NHAN_SO);
+    }
+
+    public static Cursor getAllsKhachChuyenSo() {
+        return db.getAlls(ContactDatabase.TYPE_KHACH_CHUYEN_SO);
+    }
+
+    public static ContactModel getFullContact(String phone) {
+        return db.getFullContact(phone);
+    }
+
+    public static boolean isExist(String phone) {
+        return db.isExist(phone);
+    }
+
+    public static HashMap<Integer, Double> getHesoGiu(String phone) {
+        return db.getHesoGiu(phone);
+    }
+
+    public static String getName(String phone) {
+        return db.getName(phone);
+    }
+}

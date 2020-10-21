@@ -1,0 +1,27 @@
+package bingo.com.utils;
+
+public class Keysaved {
+
+    public static final String TIME_RECEIVE_LOXIEN = "TIME_RECEIVE_LOXIEN";
+    public static final String TIME_RECEIVE_DE = "TIME_RECEIVE_DE";
+
+    public static final String CHOT_SO_DU = "CHOT_SO_DU";
+
+    public static final String REPLY_MESSAGE = "REPLY_MESSAGE";
+
+    public static final String RECEIVE_DUPPLICATE = "RECEIVE_DUPPLICATE";
+
+    public static final String MESSAGE_DELIVERY = "MESSAGE_DELIVERY";
+
+    public static final String CONFIG_3CANG = "CONFIG_3CANG";
+    public static final String DELIVERY_BY_POINT = "DELIVERY_BY_POINT";
+
+    //-------------
+    public static final String CLIPBOARD_BINGO = "CLIPBOARD_BINGO";
+
+    //-------
+    public static final String GIU_XIEN2_DEFAULT = "GIU_XIEN2_DEFAULT";
+    public static final String GIU_XIEN3_DEFAULT = "GIU_XIEN3_DEFAULT";
+    public static final String GIU_XIEN4_DEFAULT = "GIU_XIEN4_DEFAULT";
+    public static final String GIU_BACANG_DEFAULT = "GIU_BACANG_DEFAULT";
+}

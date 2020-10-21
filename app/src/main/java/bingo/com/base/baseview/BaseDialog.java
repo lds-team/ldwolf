@@ -1,0 +1,122 @@
+package bingo.com.base.baseview;
+
+import android.app.Dialog;
+import android.app.ProgressDialog;
+import android.content.Context;
+import android.content.DialogInterface;
+import android.content.SharedPreferences;
+import android.view.View;
+
+import java.lang.ref.WeakReference;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+
+import bingo.com.base.BaseActivity;
+import bingo.com.utils.Utils;
+import butterknife.ButterKnife;
+
+public abstract class BaseDialog implements DialogInterface.OnDismissListener, DialogInterface.OnShowListener{
+
+    protected WeakReference<Context> contextWrap;
+
+    protected Dialog dialog;
+
+    private ProgressDialog progress;
+
+    public BaseDialog(Context context, boolean notCancel) {
+
+        contextWrap = new WeakReference<Context>(context);
+
+        View view = View.inflate(contextWrap.get(), layout(), null);
+
+        ButterKnife.bind(this, view);
+
+        dialog = Utils.createDialog(contextWrap.get(), view, notCancel);
+
+        dialog.setOnDismissListener(this);
+        dialog.setOnShowListener(this);
+
+        progress = createProgress();
+    }
+
+    private ProgressDialog createProgress() {
+        ProgressDialog dialog = new ProgressDialog(contextWrap.get());
+        dialog.setIndeterminate(true);
+        dialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+        dialog.setCanceledOnTouchOutside(false);
+        dialog.setCancelable(false);
+        return dialog;
+    }
+
+    @Override
+    public void onShow(DialogInterface dialog) {
+        onShowDialog(dialog);
+    }
+
+    @Override
+    public void onDismiss(DialogInterface dialog) {
+        dismissed();
+
+    }
+
+    public void releaseViews() {
+        if (progress != null)
+            progress = null;
+
+        ButterKnife.unbind(this);
+        contextWrap.clear();
+    }
+
+    public void loadingAnim() {
+        progress.show();
+    }
+
+    public void dismissAnim() {
+        if (progress != null && progress.isShowing())
+            progress.dismiss();
+    }
+
+    public void show() {
+        if (!dialog.isShowing())
+            dialog.show();
+    }
+
+    public boolean isShowing() {
+        return dialog.isShowing();
+    }
+
+    protected SharedPreferences getSaved() {
+        return contextWrap.get().getSharedPreferences(BaseActivity.PREF_NAME, Context.MODE_PRIVATE);
+    }
+
+    public void dismiss() {
+        if (dialog != null && dialog.isShowing())
+            dialog.dismiss();
+    }
+
+    protected void requestUpdate() {
+        try {
+            Class<?> c = null;
+
+            c = Class.forName("bingo.com.base.BaseActivity");
+            Method method = c.getDeclaredMethod ("requestUpdate");
+            method.invoke(contextWrap.get());
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        } catch (NoSuchMethodException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        } catch (InvocationTargetException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void onShowDialog(DialogInterface dialog) {
+
+    }
+
+    public abstract int layout();
+
+    public abstract void dismissed();
+}

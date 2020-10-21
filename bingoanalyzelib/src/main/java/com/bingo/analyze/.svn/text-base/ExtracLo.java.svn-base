@@ -1,0 +1,267 @@
+package com.bingo.analyze;
+
+import java.util.ArrayList;
+
+import com.bingo.common.utils.Cham;
+import com.bingo.common.utils.ChanLe;
+import com.bingo.common.utils.Dan;
+import com.bingo.common.utils.DauDit;
+import com.bingo.common.utils.Ghep;
+import com.bingo.common.utils.Kep;
+import com.bingo.common.utils.OneHundred;
+import com.bingo.common.utils.ToNho;
+import com.bingo.common.utils.Tong;
+import com.bingo.common.utils.Utils;
+import com.bingo.common.utils.Xien;
+
+public class ExtracLo {
+	
+	public static ArrayList<ExtractObject> analyze(String syntax){
+		ArrayList<ExtractObject> extractObjectArray = new ArrayList<>();
+		
+		ExtractObject obExtractObjectLo = ExtracLo.phanTichLo(syntax);
+		if(obExtractObjectLo != null){
+			extractObjectArray.add(obExtractObjectLo);
+		}
+		
+		ExtractObject obExtractObjectLoBo = ExtracLo.phanTichLoBo(syntax);
+		if(obExtractObjectLoBo != null){
+			extractObjectArray.add(obExtractObjectLoBo);
+		}
+		ExtractObject obExtractObjectLoKepBang = ExtracLo.phanTichLoKepBang(syntax);
+		if(obExtractObjectLoKepBang != null){
+			extractObjectArray.add(obExtractObjectLoKepBang);
+		}
+		ExtractObject obExtractObjectLoKepLech = ExtracLo.phanTichLoKepLech(syntax);
+		if(obExtractObjectLoKepLech != null){
+			extractObjectArray.add(obExtractObjectLoKepLech);
+		}
+		ExtractObject obExtractObjectLoSatKep = ExtracLo.phanTichLoSatKep(syntax);
+		if(obExtractObjectLoSatKep != null){
+			extractObjectArray.add(obExtractObjectLoSatKep);
+		}
+		
+		ExtractObject obExtractObjectLo100So = ExtracLo.phanTichLo100So(syntax);
+		if(obExtractObjectLo100So != null){
+			extractObjectArray.add(obExtractObjectLo100So);
+		}
+		
+		ExtractObject obExtractObjectLoTong = ExtracLo.phanTichLoTong(syntax);
+		if(obExtractObjectLoTong != null){
+			extractObjectArray.add(obExtractObjectLoTong);
+		}
+		
+		ExtractObject obExtractObjectLoTongChiaBa = ExtracLo.phanTichLoTongChiaBa(syntax);
+		if(obExtractObjectLoTongChiaBa != null){
+			extractObjectArray.add(obExtractObjectLoTongChiaBa);
+		}
+		
+		ExtractObject obExtractObjectLoTongChiaBaDu1 = ExtracLo.phanTichLoTongChiaBaDu1(syntax);
+		if(obExtractObjectLoTongChiaBaDu1 != null){
+			extractObjectArray.add(obExtractObjectLoTongChiaBaDu1);
+		}
+		
+		ExtractObject obExtractObjectLoTongChiaBaDu2 = ExtracLo.phanTichLoTongChiaBaDu2(syntax);
+		if(obExtractObjectLoTongChiaBaDu2 != null){
+			extractObjectArray.add(obExtractObjectLoTongChiaBaDu2);
+		}
+		
+		ExtractObject obExtractObjectLoDau = ExtracLo.phanTichLoDau(syntax);
+		if(obExtractObjectLoDau != null){
+			extractObjectArray.add(obExtractObjectLoDau);
+		}
+		
+		ExtractObject obExtractObjectLoCham = ExtracLo.phanTichLoCham(syntax);
+		if(obExtractObjectLoCham != null){
+			extractObjectArray.add(obExtractObjectLoCham);
+		}
+		
+		ExtractObject obExtractObjectLoChanLe = ExtracLo.phanTichLoChanLe(syntax);
+		if(obExtractObjectLoChanLe != null){
+			extractObjectArray.add(obExtractObjectLoChanLe);
+		}
+		
+		ExtractObject obExtractObjectLoToNho = ExtracLo.phanTichLoToNho(syntax);
+		if(obExtractObjectLoToNho != null){
+			extractObjectArray.add(obExtractObjectLoToNho);
+		}
+		
+		ExtractObject obExtractObjectLoDan = ExtracLo.phanTichLoDan(syntax);
+		if(obExtractObjectLoDan != null){
+			extractObjectArray.add(obExtractObjectLoDan);
+		}
+		
+		ExtractObject obExtractObjectXien = ExtracLo.phanTichXien(syntax);
+		if(obExtractObjectXien != null){
+			extractObjectArray.add(obExtractObjectXien);
+		}
+		
+		return extractObjectArray;
+	}
+	
+	
+	
+	protected static ExtractObject phanTichLo(String syntax) {
+		// lo 17,12,21x50k
+		boolean isRightSyntax = syntax.matches("lo\\s*[0-9]+.*x[0-9]+\\s*k|lo\\s*[0-9]+.*x[0-9]+\\s*d");
+		ExtractObject extractObject = null;
+		ArrayList<RemoveObject> removeNumbers = null;
+		if (isRightSyntax) {
+			removeNumbers = Utils.extractRemoveNumber(Utils.getRemoveNumber(syntax));
+			extractObject = Utils.extractNumberAndUnitPrice(syntax, "lo");
+			extractObject.RemoveNumbers = removeNumbers;
+		}
+		return extractObject;
+	}
+
+	protected static ExtractObject phanTichLoBo(String syntax) {
+		// lo 17,12,21x50k
+		syntax = syntax.replaceAll("bo[\\s]*([0-9]+)", "boj $1");
+		boolean isRightSyntax = syntax.matches("lo\\s*boj\\s*[0-9]+.*x[0-9]+\\s*k|lo\\s*boj\\s*[0-9]+.*x[0-9]+\\s*d");
+		ExtractObject extractObject = null;
+		ArrayList<RemoveObject> removeNumbers = null;
+		if (isRightSyntax) {
+			syntax = syntax.replaceAll("boj", "");
+			removeNumbers = Utils.extractRemoveNumber(Utils.getRemoveNumber(syntax));
+			extractObject = Utils.extractNumberAndUnitPrice(syntax, "lo boj");
+			extractObject.RemoveNumbers = removeNumbers;
+		}
+		return extractObject;
+	}
+
+	
+	protected static ExtractObject phanTichLoKepBang(String syntax) {
+		ArrayList<RemoveObject> removeNumbers = Utils.extractRemoveNumber(Utils.getRemoveNumber(syntax));
+		ExtractObject extractObject = Kep.getKepBang(syntax);
+		if(extractObject != null){
+			extractObject.RemoveNumbers = removeNumbers;
+		}
+		return extractObject;
+	}
+	
+	protected static ExtractObject phanTichLoKepLech(String syntax) {
+		ArrayList<RemoveObject> removeNumbers = Utils.extractRemoveNumber(Utils.getRemoveNumber(syntax));
+		ExtractObject extractObject = Kep.getKepLech(syntax);
+		if(extractObject != null){
+			extractObject.RemoveNumbers = removeNumbers;
+		}
+		return extractObject;
+	}
+	
+	protected static ExtractObject phanTichLoSatKep(String syntax) {
+		ArrayList<RemoveObject> removeNumbers = Utils.extractRemoveNumber(Utils.getRemoveNumber(syntax));
+		ExtractObject extractObject = Kep.getSatKep(syntax);
+		if(extractObject != null){
+			extractObject.RemoveNumbers = removeNumbers;
+		}
+		return extractObject;
+	}
+	
+	protected static ExtractObject phanTichLo100So(String syntax) {
+		ArrayList<RemoveObject> removeNumbers = Utils.extractRemoveNumber(Utils.getRemoveNumber(syntax));
+		ExtractObject extractObject = OneHundred.get100So(syntax);
+		if(extractObject != null){
+			extractObject.RemoveNumbers = removeNumbers;
+		}
+		return extractObject;
+	}
+	
+	protected static ExtractObject phanTichLoTong(String syntax) {
+		ArrayList<RemoveObject> removeNumbers = Utils.extractRemoveNumber(Utils.getRemoveNumber(syntax));
+		ExtractObject extractObject = Tong.getTong(syntax);
+		if(extractObject != null){
+			extractObject.RemoveNumbers = removeNumbers;
+		}
+		return extractObject;
+	}
+	
+	protected static ExtractObject phanTichLoTongChiaBa(String syntax) {
+		ArrayList<RemoveObject> removeNumbers = Utils.extractRemoveNumber(Utils.getRemoveNumber(syntax));
+		ExtractObject extractObject = Tong.getTongChiaBa(syntax);
+		if(extractObject != null){
+			extractObject.RemoveNumbers = removeNumbers;
+		}
+		return extractObject;
+	}
+	
+	protected static ExtractObject phanTichLoTongChiaBaDu1(String syntax) {
+		ArrayList<RemoveObject> removeNumbers = Utils.extractRemoveNumber(Utils.getRemoveNumber(syntax));
+		ExtractObject extractObject = Tong.getTongChiaBaDu1(syntax);
+		if(extractObject != null){
+			extractObject.RemoveNumbers = removeNumbers;
+		}
+		return extractObject;
+	}
+	
+	protected static ExtractObject phanTichLoTongChiaBaDu2(String syntax) {
+		ArrayList<RemoveObject> removeNumbers = Utils.extractRemoveNumber(Utils.getRemoveNumber(syntax));
+		ExtractObject extractObject = Tong.getTongChiaBaDu2(syntax);
+		if(extractObject != null){
+			extractObject.RemoveNumbers = removeNumbers;
+		}
+		return extractObject;
+	}
+	
+	protected static ExtractObject phanTichLoDau(String syntax) {
+		ArrayList<RemoveObject> removeNumbers = Utils.extractRemoveNumber(Utils.getRemoveNumber(syntax));
+		ExtractObject extractObject = DauDit.getDauDuoi(syntax);
+		if(extractObject != null){
+			extractObject.RemoveNumbers = removeNumbers;
+		}
+		return extractObject;
+	}
+	
+	protected static ExtractObject phanTichLoCham(String syntax) {
+		ArrayList<RemoveObject> removeNumbers = Utils.extractRemoveNumber(Utils.getRemoveNumber(syntax));
+		ExtractObject extractObject = Cham.getCham(syntax);
+		if(extractObject != null){
+			extractObject.RemoveNumbers = removeNumbers;
+		}
+		return extractObject;
+	}
+	
+	protected static ExtractObject phanTichLoChanLe(String syntax) {
+		ArrayList<RemoveObject> removeNumbers = Utils.extractRemoveNumber(Utils.getRemoveNumber(syntax));
+		ExtractObject extractObject = ChanLe.getChanLe(syntax);
+		if(extractObject != null){
+			extractObject.RemoveNumbers = removeNumbers;
+		}
+		return extractObject;
+	}
+	
+	protected static ExtractObject phanTichLoToNho(String syntax) {
+		ArrayList<RemoveObject> removeNumbers = Utils.extractRemoveNumber(Utils.getRemoveNumber(syntax));
+		ExtractObject extractObject = ToNho.getToNho(syntax);
+		if(extractObject != null){
+			extractObject.RemoveNumbers = removeNumbers;
+		}
+		return extractObject;
+	}
+	
+	protected static ExtractObject phanTichLoDan(String syntax) {
+		ArrayList<RemoveObject> removeNumbers = Utils.extractRemoveNumber(Utils.getRemoveNumber(syntax));
+		ExtractObject extractObject = Dan.getDan(syntax);
+		if(extractObject != null){
+			extractObject.RemoveNumbers = removeNumbers;
+		}
+		return extractObject;
+	}
+	
+	protected static ExtractObject phanTichLoGhep(String syntax) {
+		ArrayList<RemoveObject> removeNumbers = Utils.extractRemoveNumber(Utils.getRemoveNumber(syntax));
+		ExtractObject extractObject = Ghep.getGhep(syntax);
+		if(extractObject != null){
+			extractObject.RemoveNumbers = removeNumbers;
+		}
+		return extractObject;
+	}
+	
+	protected static ExtractObject phanTichXien(String syntax) {
+		ArrayList<RemoveObject> removeNumbers = Utils.extractRemoveNumber(Utils.getRemoveNumber(syntax));
+		ExtractObject extractObject = Xien.getXien(syntax);
+		if(extractObject != null){
+			extractObject.RemoveNumbers = removeNumbers;
+		}
+		return extractObject;
+	}
+}

@@ -1,0 +1,107 @@
+package bingo.com.screen.numberreport;
+
+import android.database.Cursor;
+import android.os.Bundle;
+import android.support.v7.widget.DividerItemDecoration;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
+import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.SimpleCursorAdapter;
+import android.widget.Spinner;
+import android.widget.TextView;
+
+import bingo.com.R;
+import bingo.com.base.Basev4Fragment;
+import bingo.com.enumtype.TypeMessage;
+import bingo.com.helperdb.ContactDBHelper;
+import bingo.com.helperdb.MessageDBHelper;
+import bingo.com.helperdb.db.ContactDatabase;
+import bingo.com.helperdb.db.MessageDatabase;
+import bingo.com.screen.numberreport.adapter.MessageAdapter;
+import butterknife.Bind;
+import butterknife.OnItemSelected;
+
+public class MessageFragment extends Basev4Fragment {
+
+    public static final String TAG = "MessageFragment";
+
+    @Bind(R.id.message_spin)
+    Spinner listCustomer;
+
+    @Bind(R.id.message_list)
+    RecyclerView listMessage;
+
+    @Bind(R.id.message_count)
+    TextView textCount;
+
+    private MessageAdapter adapter;
+
+    @Override
+    public View onCreateFragmentView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        registerObs(this);
+        return inflater.inflate(R.layout.fragment_message, container, false);
+    }
+
+    @Override
+    public void onViewFragmentCreated(View view, Bundle savedInstanceState) {
+        initListContact();
+        initListMessage();
+    }
+
+    private void initListContact() {
+
+        SimpleCursorAdapter adapter = new SimpleCursorAdapter(
+                getContext(),
+                android.R.layout.simple_spinner_dropdown_item,
+                MessageDBHelper.getDb().getAllContact(),
+                new String[]{ContactDatabase.NAME},
+                new int[]{android.R.id.text1}, 0);
+
+        listCustomer.setAdapter(adapter);
+        listCustomer.setDropDownVerticalOffset(120);
+        listCustomer.setSelection(0);
+    }
+
+    private void initListMessage() {
+        LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity().getApplicationContext());
+        listMessage.setLayoutManager(layoutManager);
+
+        DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(listMessage.getContext(),
+                layoutManager.getOrientation());
+        listMessage.addItemDecoration(dividerItemDecoration);
+
+        adapter = new MessageAdapter(getContext(), null);
+        listMessage.setAdapter(adapter);
+    }
+
+    @OnItemSelected(R.id.message_spin)
+    public void changeCustomer() {
+        requestUpdate();
+    }
+
+    @Override
+    public void update() {
+        if (adapter != null && listCustomer.getSelectedItem() != null && listCustomer.getSelectedItem() instanceof Cursor)
+        {
+            Cursor c = ((Cursor) listCustomer.getSelectedItem());
+
+            String phone = c.getString(c.getColumnIndex(MessageDatabase.PHONE));
+
+            if (phone == null)
+                return;
+
+            adapter.swapCursor(MessageDBHelper.getMessageOnly(phone, TypeMessage.SMS, 0));
+            textCount.setText(String.valueOf(adapter.getItemCount()));
+        }
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+
+        unRegisterObs(this);
+    }
+}

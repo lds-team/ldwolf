@@ -1,0 +1,129 @@
+package bingo.com.screen.numberreport;
+
+import android.database.Cursor;
+import android.os.Bundle;
+import android.support.v7.widget.DividerItemDecoration;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+
+import bingo.com.R;
+import bingo.com.base.Basev4Fragment;
+import bingo.com.customviews.ResultView;
+import bingo.com.enumtype.TypeMessage;
+import bingo.com.helperdb.FollowDBHelper;
+import bingo.com.screen.numberreport.adapter.CustomerAdapter;
+import butterknife.Bind;
+
+/**
+ * Created by kazinguyen on 6/15/17.
+ */
+public class CustomerFragment extends Basev4Fragment {
+
+    public static final String TAG = "CustomerFragment";
+
+    @Bind(R.id.customer_list)
+    RecyclerView lst;
+
+    @Bind(R.id.customer_resultview)
+    ResultView resultView;
+
+    private CustomerAdapter adapter;
+
+    @Override
+    public View onCreateFragmentView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        registerObs(this);
+        return inflater.inflate(R.layout.fragment_customer, container, false);
+    }
+
+    @Override
+    public void onViewFragmentCreated(View view, Bundle savedInstanceState) {
+        LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity().getApplicationContext());
+        lst.setLayoutManager(layoutManager);
+
+        DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(lst.getContext(),
+                layoutManager.getOrientation());
+        lst.addItemDecoration(dividerItemDecoration);
+
+        adapter = new CustomerAdapter(getActivity(), null);
+        lst.setAdapter(adapter);
+
+        fillKeepData();
+
+        adapter.swapCursor(FollowDBHelper.getAllPhone());
+    }
+
+    private void fillKeepData() {
+        Cursor cursor = FollowDBHelper.getSumAllParentType(TypeMessage.RECEIVED);
+        addToResult(cursor, "parenttype","sumpoint", "sumpointwin", "summoney");
+        cursor.close();
+    }
+
+    public void addToResult(Cursor cursor, String... columns) {
+
+        resultView.removeAllViews();
+
+        double sum = 0;
+
+        if (cursor != null)
+        {
+            for (int i = 0; i < cursor.getCount(); i++)
+            {
+                cursor.moveToPosition(i);
+
+                String type = cursor.getString(cursor.getColumnIndex(columns[0]));
+
+                double nhanReceived;
+                double anReceived;
+                double money = cursor.getDouble(cursor.getColumnIndex(columns[3]));
+
+                //TODO bug on sql query when sum. That is hot fix.
+                nhanReceived = FollowDBHelper.getSumReceivedValue(type);
+                anReceived = FollowDBHelper.getSumGuestWinByType(type);
+
+                Cursor cSent = FollowDBHelper.getSumAllParentType(TypeMessage.SENT, type);
+
+                boolean hasSent = cSent.moveToFirst();
+
+                double nhanSent = FollowDBHelper.getSumSentValue(type);
+                double anSent = FollowDBHelper.getSumSentGuestWinByType(type);
+                double sent = hasSent ? cSent.getDouble(cSent.getColumnIndex(columns[3])) : 0;
+
+                cSent.close();
+                //---------------
+
+                sum += (money - sent);
+
+                this.resultView.add(type,
+                        new double[]{
+                                nhanReceived- nhanSent,
+                                anReceived - anSent,
+                                (money - sent)
+                        });
+
+                if (i == cursor.getCount() - 1)
+                {
+                    resultView.addBottom(sum);
+                }
+            }
+        }
+
+    }
+
+    @Override
+    public void update() {
+        fillKeepData();
+
+        adapter.getCursor().requery();
+        adapter.notifyDataSetChanged();
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+
+        unRegisterObs(this);
+    }
+}

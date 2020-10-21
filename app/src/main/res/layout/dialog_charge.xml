@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/dialog_bg"
+    android:minHeight="250dp">
+
+    <TextView
+        android:id="@+id/dialog_charge_text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@android:color/holo_blue_dark"
+        android:paddingBottom="10dp"
+        android:paddingLeft="50dp"
+        android:paddingRight="50dp"
+        android:paddingTop="10dp"
+        android:text="Khởi tạo công nợ mới"
+        android:textAlignment="center"
+        android:textColor="@android:color/white"
+        android:textSize="18sp"
+        android:textStyle="bold" />
+
+    <RelativeLayout
+        android:id="@+id/dialog_charge_spin_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/dialog_charge_text">
+
+        <Spinner
+            android:id="@+id/dialog_charge_spin"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:background="@drawable/spinner_bg"
+            android:spinnerMode="dropdown"
+            android:verticalScrollbarPosition="right" />
+
+        <ImageView
+            android:layout_width="60dp"
+            android:layout_height="50dp"
+            android:layout_alignParentEnd="true"
+            android:background="@drawable/drop"
+            android:contentDescription="@null" />
+
+        <TextView
+            android:id="@+id/dialog_charge_customer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/dialog_charge_spin"
+            android:padding="5dp"
+            android:text="123"
+            android:textColor="@android:color/holo_red_dark" />
+    </RelativeLayout>
+
+    <bingo.com.customviews.TextViewDegit
+        android:id="@+id/dialog_charge_old"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:layout_below="@+id/dialog_charge_spin_layout"
+        android:layout_marginEnd="10dp"
+        android:padding="5dp"
+        android:text="Old value"
+        android:textAlignment="viewEnd"
+        android:textSize="20sp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/dialog_charge_text2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/dialog_charge_old"
+        android:layout_marginRight="20dp"
+        android:text="||"
+        android:textAlignment="viewEnd"
+        android:textSize="20sp" />
+
+    <TextView
+        android:id="@+id/dialog_charge_text3"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/dialog_charge_text2"
+        android:layout_marginRight="20dp"
+        android:layout_marginTop="-5dp"
+        android:text="||"
+        android:textAlignment="viewEnd"
+        android:textSize="20sp" />
+
+    <TextView
+        android:id="@+id/dialog_charge_text4"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/dialog_charge_text3"
+        android:layout_marginRight="20dp"
+        android:layout_marginTop="-5dp"
+        android:text="||"
+        android:textAlignment="viewEnd"
+        android:textSize="20sp" />
+
+    <TextView
+        android:id="@+id/dialog_charge_text5"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/dialog_charge_text4"
+        android:layout_marginBottom="5dp"
+        android:layout_marginRight="19dp"
+        android:layout_marginTop="-10dp"
+        android:text="v"
+        android:textAlignment="viewEnd"
+        android:textSize="25sp" />
+
+    <EditText
+        android:id="@+id/dialog_charge_changed"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:layout_below="@+id/dialog_charge_text4"
+        android:layout_marginTop="10dp"
+        android:hint="0"
+        android:inputType="number"
+        android:maxLength="20"
+        android:digits="-0123456789"
+        android:paddingEnd="10dp"
+        android:textAlignment="viewEnd"
+        android:textSize="20sp"
+        android:textStyle="bold" />
+
+    <Button
+        android:id="@+id/dialog_charge_create"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/dialog_charge_changed"
+        android:layout_marginBottom="5dp"
+        android:layout_marginEnd="5dp"
+        android:layout_marginStart="5dp"
+        android:background="@drawable/button_bg"
+        android:padding="5dp"
+        android:text="Xóa công nợ cũ và Khởi tạo"
+        android:textAllCaps="true" />
+</RelativeLayout>

@@ -1,0 +1,50 @@
+package com.bingo.common.utils;
+
+import java.util.ArrayList;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import com.bingo.analyze.ExtractObject;
+
+public class Xien {
+	public static ExtractObject getXien(String syntax) {
+		ExtractObject extractObject = null;
+		boolean isSyntax = syntax.matches(".*(xien|lo\\s*xien|xien\\s*ghep|xien\\s*quay|xq)\\s*[0-9\\s\\.\\,]+\\s*x[0-9]+\\s*(k|d)");
+		if (isSyntax) {
+			
+			extractObject = Utils.extractUnitPrice(syntax);
+			extractObject.Numbers = new ArrayList<>();
+			
+			String regexXien = "([0-9\\.\\,]+)";
+			String _tmpSyntax = syntax.replaceAll("xien|xq", "");
+			_tmpSyntax = _tmpSyntax.substring(0, _tmpSyntax.indexOf("x"));
+			Matcher matcherXien = Pattern.compile(regexXien).matcher(_tmpSyntax);
+			while (matcherXien.find()) {
+				String num = matcherXien.group(1).trim();
+				if(num.length()==1) continue;
+				extractObject.Numbers.add(num);
+			}
+			
+			boolean isDe = syntax.matches(".*de.*x[0-9]+\\s*k|.*de.*x[0-9]+\\s*d");
+			if(isDe){
+				extractObject.Type = "de";
+			}else{
+				boolean isLo = syntax.matches(".*lo.*x[0-9]+\\s*k|.*lo.*x[0-9]+\\s*d");
+				boolean isXien = syntax.matches(".*(xien|lo\\s*xien|xien\\s*ghep)\\s*[0-9\\s\\.\\,]+\\s*x[0-9]+\\s*(k|d)");
+				boolean isXienQuay = syntax.matches(".*(xien\\s*quay|xq)\\s*[0-9\\s\\.\\,]+\\s*x[0-9]+\\s*(k|d)");
+				if(isLo){
+					extractObject.Type = "lo";
+				}else if(isXien){
+					extractObject.Type = "xien";
+				}else if(isXienQuay){
+					extractObject.Type = "xq";
+				}else{
+					extractObject.Type = "Unknow";
+				}
+			}
+			
+		}
+		
+		return extractObject;
+	}
+}

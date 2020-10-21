@@ -1,0 +1,17 @@
+package bingo.com.base;
+
+import android.content.Context;
+import android.content.Intent;
+
+import bingo.com.utils.Action;
+
+/**
+ * Created by kazinguyen on 7/5/17.
+ */
+public class BaseDBHelper {
+
+    protected static void requestUpdateUI(Context context) {
+        Intent intent = new Intent(Action.ACTION_REQUEST_UPDATE);
+        context.sendBroadcast(intent);
+    }
+}

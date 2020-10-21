@@ -1,0 +1,22 @@
+package bingo.com.utils;
+
+import com.bingo.analyze.Analyze;
+import com.bingo.analyze.AnalyzeSMSNew;
+
+/**
+ * Created by kazinguyen on 3/28/17.
+ */
+public class Validate {
+
+    public static String canAnalyze(String content) {
+        AnalyzeSMSNew analyze = new AnalyzeSMSNew();
+        Analyze analyzeObj = analyze.validateMessage(content);
+
+        if (analyzeObj.error)
+        {
+            return analyzeObj.errorMessage;
+        }
+
+        return null;
+    }
+}

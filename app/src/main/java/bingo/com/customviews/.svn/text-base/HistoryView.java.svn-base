@@ -1,0 +1,112 @@
+package bingo.com.customviews;
+
+import android.annotation.TargetApi;
+import android.content.Context;
+import android.database.Cursor;
+import android.os.Build;
+import android.util.AttributeSet;
+import android.view.View;
+import android.widget.LinearLayout;
+
+import bingo.com.R;
+
+/**
+ * Created by kazinguyen on 7/15/17.
+ */
+public class HistoryView extends LinearLayout {
+
+    private Context context;
+
+    public HistoryView(Context context) {
+        super(context);
+        init();
+        this.context = context;
+    }
+
+    public HistoryView(Context context, AttributeSet attrs) {
+        super(context, attrs);
+        init();
+        this.context = context;
+    }
+
+    public HistoryView(Context context, AttributeSet attrs, int defStyleAttr) {
+        super(context, attrs, defStyleAttr);
+        init();
+        this.context = context;
+    }
+
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+    public HistoryView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+        super(context, attrs, defStyleAttr, defStyleRes);
+        init();
+        this.context = context;
+    }
+
+    private void init() {
+        setOrientation(VERTICAL);
+    }
+
+    public void add(String name, double[] line) {
+
+        View view = View.inflate(context, R.layout.item_historyview, null);
+
+        ((TextViewDegit) view.findViewById(R.id.historyview_text1)).setText(name);
+        ((TextViewDegit) view.findViewById(R.id.historyview_text2)).setResult(line[0]);
+        ((TextViewDegit) view.findViewById(R.id.historyview_text3)).setResult(line[1]);
+
+        this.addView(view);
+    }
+
+    public void addBottom(double... sum) {
+
+        View sumView = View.inflate(context, R.layout.item_resultviewsum, null);
+
+        if (sum.length == 1)
+        {
+            ((TextViewDegit) sumView.findViewById(R.id.resultview_sum1)).setVisibility(GONE);
+
+            ((TextViewDegit) sumView.findViewById(R.id.resultview_sum2)).setResult(sum[0]);
+        }
+        else
+        {
+            ((TextViewDegit) sumView.findViewById(R.id.resultview_sum1)).setVisibility(VISIBLE);
+
+            ((TextViewDegit) sumView.findViewById(R.id.resultview_sum1)).setResult(sum[0]);
+            ((TextViewDegit) sumView.findViewById(R.id.resultview_sum2)).setResult(sum[1]);
+        }
+
+
+        this.addView(sumView);
+    }
+
+    public void addAlls(Cursor cursor, String... columns) {
+        removeAllViews();
+
+        double sum = 0;
+
+        if (cursor != null)
+        {
+            for (int i = 0; i < cursor.getCount(); i++)
+            {
+                cursor.moveToPosition(i);
+
+                double money = cursor.getDouble(cursor.getColumnIndex(columns[2]));
+
+                sum += money;
+
+                this.add(cursor.getString(cursor.getColumnIndex(columns[0])),
+                        new double[]{
+                                cursor.getDouble(cursor.getColumnIndex(columns[1])),
+                                money
+                        });
+
+                if (i == cursor.getCount() - 1)
+                {
+                    addBottom(sum);
+                }
+
+            }
+        }
+
+    }
+}

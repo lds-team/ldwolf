@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/showgiuso"
+        android:title="Nhập dàn giữ số"/>
+
+    <item
+        android:id="@+id/showrange"
+        android:title="Hiện thanh chọn"/>
+
+    <item
+        android:id="@+id/support"
+        android:title="Hướng dẫn tiền xuất"/>
+</menu>

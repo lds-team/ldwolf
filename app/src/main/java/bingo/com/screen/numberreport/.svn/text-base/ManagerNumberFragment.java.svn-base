@@ -1,0 +1,264 @@
+package bingo.com.screen.numberreport;
+
+import android.app.Dialog;
+import android.database.Cursor;
+import android.graphics.Color;
+import android.os.Bundle;
+import android.support.v7.widget.DividerItemDecoration;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
+import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.RadioGroup;
+import android.widget.TextView;
+
+import com.getbase.floatingactionbutton.FloatingActionsMenu;
+
+import bingo.com.R;
+import bingo.com.base.Basev4Fragment;
+import bingo.com.dialog.GiuSoDialog;
+import bingo.com.dialog.XuatSoDialog;
+import bingo.com.enumtype.LotoType;
+import bingo.com.enumtype.TypeMessage;
+import bingo.com.helperdb.FollowDBHelper;
+import bingo.com.screen.numberreport.adapter.NumberAdapter;
+import bingo.com.utils.Utils;
+import butterknife.Bind;
+import butterknife.OnClick;
+
+/**
+ * Created by kazinguyen on 6/15/17.
+ */
+public class ManagerNumberFragment extends Basev4Fragment implements View.OnClickListener {
+
+    public static final String TAG = "ManagerNumberFragment";
+
+    @Bind(R.id.managernumber_list)
+    RecyclerView lstNum;
+
+    @Bind(R.id.fam)
+    FloatingActionsMenu fam;
+
+    private Dialog chooser;
+
+    private NumberAdapter adapter;
+
+    @Bind(R.id.managernumber_sort_received)
+    TextView vNhan;
+
+    @Bind(R.id.managernumber_sort_keep)
+    TextView vGiu;
+
+    @Bind(R.id.managernumber_sort_sent)
+    TextView vChuyen;
+
+    @Bind(R.id.managernumber_sort_other)
+    TextView vTon;
+
+    @Bind(R.id.managernumber_filter)
+    Button chooserBtn;
+
+    RadioGroup group;
+
+    private String currentTypeChoose;
+
+    @Override
+    public View onCreateFragmentView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+
+        registerObs(this);
+
+        return inflater.inflate(R.layout.fragment_managernummber, container, false);
+    }
+
+    @Override
+    public void onViewFragmentCreated(View view, Bundle savedInstanceState) {
+
+        LinearLayoutManager layoutManager = new LinearLayoutManager(getContext().getApplicationContext());
+        lstNum.setLayoutManager(layoutManager);
+
+        DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(lstNum.getContext(),
+                layoutManager.getOrientation());
+        lstNum.addItemDecoration(dividerItemDecoration);
+
+        currentTypeChoose = LotoType.de.name();
+        adapter = new NumberAdapter(getActivity(), queryNumber(currentTypeChoose, null));
+        lstNum.setAdapter(adapter);
+
+        setDefaultSortUI();
+
+        initChooser();
+    }
+
+    private void initChooser() {
+        View view = View.inflate(getActivity(), R.layout.dialog_chooser_numberfilter, null);
+        chooser = Utils.createDialog(getActivity(), view, false);
+        group = (RadioGroup) view.findViewById(R.id.number_filter_group);
+
+        group.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(RadioGroup group, int checkedId) {
+                currentTypeChoose = getChooseType(checkedId);
+                requestChangeNumber(currentTypeChoose);
+            }
+        });
+
+    }
+
+    private void requestChangeNumber(String type) {
+        dismissChooser();
+        adapter.swapCursor(queryNumber(type, null));
+
+        chooserBtn.setText("LỌC XEM CHI TIẾT: ".concat(type));
+    }
+
+    private String getChooseType(int id) {
+        switch (id) {
+            case R.id.number_filter_dedit:
+                return LotoType.de.name();
+
+            case R.id.number_filter_xemlo:
+                return LotoType.lo.name();
+
+            case R.id.number_filter_xemxien:
+                return LotoType.xien.name();
+
+            case R.id.number_filter_dedau:
+                return LotoType.daudb.name();
+
+            case R.id.number_filter_dedaunhat:
+                return LotoType.daunhat.name();
+
+            case R.id.number_filter_deditnhat:
+                return LotoType.ditnhat.name();
+
+            case R.id.number_filter_bacang:
+                return LotoType.bacang.name();
+
+            default:
+                return null;
+        }
+    }
+
+    private Cursor queryNumber(String type, TypeMessage sortType) {
+        if (type == null)
+            return FollowDBHelper.getAllTypeNumber(LotoType.de.name(), sortType);
+        else
+            return FollowDBHelper.getAllTypeNumber(type, sortType);
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+
+        dismissChooser();
+    }
+
+    @OnClick(R.id.managernumber_filter)
+    void showChooser() {
+        chooser.show();
+    }
+
+    private void dismissChooser() {
+        if (chooser.isShowing())
+            chooser.dismiss();
+    }
+
+    @OnClick({R.id.managernumber_xuatdan, R.id.managernumber_giuso,
+            R.id.managernumber_sort_received, R.id.managernumber_sort_sent, R.id.managernumber_sort_keep, R.id.managernumber_sort_other})
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()) {
+            case R.id.managernumber_xuatdan:
+                showXuatDanDialog(XuatSoDialog.TYPE_XUAT_SO);
+                break;
+
+            case R.id.managernumber_giuso:
+                showGiusoDialog();
+                break;
+
+            //Sort
+            case R.id.managernumber_sort_received:
+
+                vNhan.setTextColor(Color.RED);
+                vGiu.setTextColor(Color.BLACK);
+                vChuyen.setTextColor(Color.BLACK);
+                vTon.setTextColor(Color.BLACK);
+
+                adapter.swapCursor(queryNumber(currentTypeChoose, TypeMessage.RECEIVED));
+                break;
+
+            case R.id.managernumber_sort_sent:
+
+                vNhan.setTextColor(Color.BLACK);
+                vGiu.setTextColor(Color.BLACK);
+                vChuyen.setTextColor(Color.RED);
+                vTon.setTextColor(Color.BLACK);
+
+                adapter.swapCursor(queryNumber(currentTypeChoose, TypeMessage.SENT));
+                break;
+
+            case R.id.managernumber_sort_keep:
+
+                vNhan.setTextColor(Color.BLACK);
+                vGiu.setTextColor(Color.RED);
+                vChuyen.setTextColor(Color.BLACK);
+                vTon.setTextColor(Color.BLACK);
+
+                adapter.swapCursor(queryNumber(currentTypeChoose, TypeMessage.KEEP));
+                break;
+
+            case R.id.managernumber_sort_other:
+
+                vNhan.setTextColor(Color.BLACK);
+                vGiu.setTextColor(Color.BLACK);
+                vChuyen.setTextColor(Color.BLACK);
+                vTon.setTextColor(Color.RED);
+
+                adapter.swapCursor(queryNumber(currentTypeChoose, TypeMessage.SMS));
+                break;
+
+            default:
+                break;
+        }
+
+        fam.collapse();
+    }
+
+    private void showXuatDanDialog(int type) {
+        XuatSoDialog dialog = new XuatSoDialog(getActivity(), false, type);
+        dialog.show();
+    }
+
+    private void showGiusoDialog() {
+        GiuSoDialog dialog = new GiuSoDialog(getActivity(), false, GiuSoDialog.TYPE_LAYOUT.DELO);
+        dialog.show();
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+
+        unRegisterObs(this);
+    }
+
+    @Override
+    public void update() {
+        Log.d(TAG, "Request Update On Thread: " + Thread.currentThread().getName());
+
+        if (adapter != null) {
+            adapter.swapCursor(queryNumber(currentTypeChoose, null));
+
+            setDefaultSortUI();
+        }
+    }
+
+    private void setDefaultSortUI() {
+        vNhan.setTextColor(Color.RED);
+        vGiu.setTextColor(Color.BLACK);
+        vChuyen.setTextColor(Color.BLACK);
+        vTon.setTextColor(Color.BLACK);
+    }
+}

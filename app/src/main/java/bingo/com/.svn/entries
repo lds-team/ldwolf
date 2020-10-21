@@ -1,0 +1,155 @@
+10
+
+dir
+156
+https://nvan@124.158.1.28:8443/svn/BINGO/BingoNew/BingoNew/app/src/main/java/bingo/com
+https://nvan@124.158.1.28:8443/svn/BINGO
+
+
+
+2017-08-04T09:41:27.567867Z
+156
+nvan
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+73f67ac8-a5ec-5046-a2f0-75f85d8cca8c
+
+BingoApp.java
+file
+
+
+
+
+2017-07-08T05:52:43.000000Z
+4b96c83e7f43e0ca775c4a66f46b2745
+2017-07-10T00:38:19.797850Z
+122
+nvan
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+769
+
+EditMessageActivity.java
+file
+0
+
+
+add
+
+MainActivity.java
+file
+159
+
+
+
+2017-08-07T16:06:55.000000Z
+6041ea87053a213c90ba56e7671de1a8
+2017-08-12T17:47:29.944002Z
+159
+nvan
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+9438
+
+ano
+dir
+
+async
+dir
+
+base
+dir
+
+callbacks
+dir
+
+controller
+dir
+
+
+
+add
+
+customviews
+dir
+
+dialog
+dir
+
+enumtype
+dir
+
+helperdb
+dir
+
+model
+dir
+
+obs
+dir
+
+pref
+dir
+
+receiver
+dir
+
+screen
+dir
+
+service
+dir
+
+utils
+dir
+

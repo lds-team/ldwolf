@@ -1,0 +1,15 @@
+package bingo.com.base;
+
+import android.app.Application;
+
+/**
+ * Created by kazinguyen on 6/17/17.
+ */
+public class BaseBingoApp extends Application {
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+
+    }
+}

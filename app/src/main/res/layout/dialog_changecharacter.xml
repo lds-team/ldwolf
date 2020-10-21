@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/button_bg_normal"
+    android:minHeight="150dp">
+
+    <EditText
+        android:id="@+id/dialog_change1"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:layout_margin="5dp"
+        android:hint="Chuỗi muốn thay đổi..."
+        android:padding="5dp"
+        android:textSize="14sp" />
+
+    <EditText
+        android:id="@+id/dialog_change2"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:layout_below="@+id/dialog_change1"
+        android:layout_margin="5dp"
+        android:hint="Thay đổi thành..."
+        android:padding="5dp"
+        android:textSize="14sp" />
+
+    <TextView
+        android:id="@+id/dialog_changenotify"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/dialog_change2"
+        android:textAlignment="center"
+        android:textColor="@android:color/holo_red_dark"
+        android:visibility="gone" />
+
+    <LinearLayout
+        android:id="@+id/dialog_changelinear"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_below="@+id/dialog_changenotify">
+
+        <Button
+            android:id="@+id/dialog_change_save"
+            android:layout_width="0dp"
+            android:layout_height="40dp"
+            android:layout_margin="5dp"
+            android:layout_weight="1"
+            android:background="@drawable/button_bg"
+            android:text="Save" />
+
+        <Button
+            android:id="@+id/dialog_change_preview"
+            android:layout_width="0dp"
+            android:layout_height="40dp"
+            android:layout_margin="5dp"
+            android:layout_weight="1"
+            android:background="@drawable/button_bg"
+            android:text="Preview" />
+    </LinearLayout>
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="120dp"
+        android:layout_below="@+id/dialog_changelinear"
+        android:layout_margin="5dp"
+        android:background="@drawable/text_bg">
+
+        <TextView
+            android:id="@+id/dialog_changepreview"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:minHeight="50dp"
+            android:padding="5dp" />
+    </ScrollView>
+</RelativeLayout>

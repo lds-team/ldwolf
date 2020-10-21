@@ -1,0 +1,13 @@
+package bingo.com.obs;
+
+/**
+ * Created by kazinguyen on 7/4/17.
+ */
+public interface DefObs {
+
+    void register(SyncObs obs);
+
+    void unRegister(SyncObs obs);
+
+    void notifyUpdate();
+}

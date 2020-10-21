@@ -1,0 +1,7 @@
+package bingo.com.base.baseadapter;
+
+/**
+ * Created by kazinguyen on 6/15/17.
+ */
+public class BaseCursorAdapter {
+}

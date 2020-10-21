@@ -1,0 +1,65 @@
+K 25
+svn:wc:ra_dav:version-url
+V 89
+/svn/BINGO/!svn/ver/105/BingoNew/BingoNew/bingoanalyzelib/src/main/java/com/bingo/analyze
+END
+ExtractObject.java
+K 25
+svn:wc:ra_dav:version-url
+V 108
+/svn/BINGO/!svn/ver/105/BingoNew/BingoNew/bingoanalyzelib/src/main/java/com/bingo/analyze/ExtractObject.java
+END
+VNCharacterUtils.java
+K 25
+svn:wc:ra_dav:version-url
+V 111
+/svn/BINGO/!svn/ver/105/BingoNew/BingoNew/bingoanalyzelib/src/main/java/com/bingo/analyze/VNCharacterUtils.java
+END
+AnalyzeSMS.java
+K 25
+svn:wc:ra_dav:version-url
+V 105
+/svn/BINGO/!svn/ver/105/BingoNew/BingoNew/bingoanalyzelib/src/main/java/com/bingo/analyze/AnalyzeSMS.java
+END
+Analyze.java
+K 25
+svn:wc:ra_dav:version-url
+V 102
+/svn/BINGO/!svn/ver/105/BingoNew/BingoNew/bingoanalyzelib/src/main/java/com/bingo/analyze/Analyze.java
+END
+ResultObject.java
+K 25
+svn:wc:ra_dav:version-url
+V 107
+/svn/BINGO/!svn/ver/105/BingoNew/BingoNew/bingoanalyzelib/src/main/java/com/bingo/analyze/ResultObject.java
+END
+ExtracLo.java
+K 25
+svn:wc:ra_dav:version-url
+V 103
+/svn/BINGO/!svn/ver/105/BingoNew/BingoNew/bingoanalyzelib/src/main/java/com/bingo/analyze/ExtracLo.java
+END
+ExtracDe.java
+K 25
+svn:wc:ra_dav:version-url
+V 103
+/svn/BINGO/!svn/ver/105/BingoNew/BingoNew/bingoanalyzelib/src/main/java/com/bingo/analyze/ExtracDe.java
+END
+AnalyzeSMSNew.java
+K 25
+svn:wc:ra_dav:version-url
+V 108
+/svn/BINGO/!svn/ver/105/BingoNew/BingoNew/bingoanalyzelib/src/main/java/com/bingo/analyze/AnalyzeSMSNew.java
+END
+RemoveObject.java
+K 25
+svn:wc:ra_dav:version-url
+V 107
+/svn/BINGO/!svn/ver/105/BingoNew/BingoNew/bingoanalyzelib/src/main/java/com/bingo/analyze/RemoveObject.java
+END
+NumberAndUnit.java
+K 25
+svn:wc:ra_dav:version-url
+V 108
+/svn/BINGO/!svn/ver/105/BingoNew/BingoNew/bingoanalyzelib/src/main/java/com/bingo/analyze/NumberAndUnit.java
+END

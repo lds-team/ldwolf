@@ -1,0 +1,142 @@
+package com.bingo.common.utils;
+
+import com.bingo.analyze.ResultObject;
+
+public class ValidateSyntax {
+	public static ResultObject validate(String syntax){
+		ResultObject resultObject = new ResultObject();
+		boolean isRightSyntax = syntax.trim().matches(".*x[0-9]+\\s*k|.*x[0-9]+\\s*d");
+		
+		resultObject.Error = !isRightSyntax;
+		if(!isRightSyntax){
+			resultObject.MsgError = syntax;
+			return resultObject;
+		}
+		
+		if(syntax.contains("lo") && syntax.contains("boj")){
+			syntax = syntax.replaceAll("bo[\\s]*([0-9]+)", "boj $1");
+			isRightSyntax = syntax.matches("lo\\s*\\:*boj\\s*[0-9]+.*x[0-9]+\\s*(k|d)");
+			resultObject.Error = !isRightSyntax;
+			if(!isRightSyntax){
+				resultObject.MsgError = syntax;
+				return resultObject;
+			}
+		}else if(syntax.contains("lo")){
+			isRightSyntax = syntax.matches("lo\\s*\\:*[0-9]+.*x[0-9]+\\s*(k|d)");
+			
+			resultObject.Error = !isRightSyntax;
+			if(!isRightSyntax){
+				resultObject.MsgError = syntax;
+				return resultObject;
+			}
+		}else if(syntax.contains("de") && syntax.contains("boj")){
+			syntax = syntax.replaceAll("bo[\\s]*([0-9]+)", "boj $1");
+			isRightSyntax = syntax.matches("de\\s*\\:*boj\\s*[0-9]+.*x[0-9]+\\s*(k|d)");
+			resultObject.Error = !isRightSyntax;
+			if(!isRightSyntax){
+				resultObject.MsgError = syntax;
+				return resultObject;
+			}
+		}else if(syntax.contains("de")){
+			isRightSyntax = syntax.matches("de\\s*\\:*[0-9]+.*x[0-9]+\\s*(k|d)");
+			
+			resultObject.Error = !isRightSyntax;
+			if(!isRightSyntax){
+				resultObject.MsgError = syntax;
+				return resultObject;
+			}
+		}else if(syntax.contains("xien")){
+			isRightSyntax = syntax.matches(".*(xien|lo\\s*xien|xien\\s*ghep|xien\\s*quay|xq)\\s*\\:*[0-9\\s\\.\\,]+\\s*x[0-9]+\\s*(k|d)");
+			resultObject.Error = !isRightSyntax;
+			if(!isRightSyntax){
+				resultObject.MsgError = syntax;
+				return resultObject;
+			}
+		}else if(syntax.contains("dan")){
+			isRightSyntax = syntax.matches(".*dan\\s*[0-9\\s]+\\s*x[0-9]+\\s*(k|d)");
+			resultObject.Error = !isRightSyntax;
+			if(!isRightSyntax){
+				resultObject.MsgError = syntax;
+				return resultObject;
+			}
+		}else if(syntax.contains("cham")){
+			isRightSyntax = syntax.matches(".*cham\\s*[0-9\\s]+.*x[0-9]+\\s*(k|d)");
+			resultObject.Error = !isRightSyntax;
+			if(!isRightSyntax){
+				resultObject.MsgError = syntax;
+				return resultObject;
+			}
+		}else if(syntax.contains("dau") || syntax.contains("dit") || syntax.contains("duoi")){
+			isRightSyntax = syntax.matches(".*(dau|dit|duoi)\\s*[0-9\\s]+.*x[0-9]+\\s*(k|d)");
+			resultObject.Error = !isRightSyntax;
+			if(!isRightSyntax){
+				resultObject.MsgError = syntax;
+				return resultObject;
+			}
+		}else if(syntax.contains("ghep")){
+			isRightSyntax = syntax.matches(".*dau\\s*[0-9\\s]+ghep\\s*(dit|duoi)[0-9\\s]+\\s*x[0-9]+\\s*(k|d)");
+			resultObject.Error = !isRightSyntax;
+			if(!isRightSyntax){
+				resultObject.MsgError = syntax;
+				return resultObject;
+			}
+		}else if(syntax.contains("kep") && syntax.contains("bang")){
+			isRightSyntax = syntax.matches(".*kep\\s*bang\\s*x[0-9]+\\s*(k|d)");
+			resultObject.Error = !isRightSyntax;
+			if(!isRightSyntax){
+				resultObject.MsgError = syntax;
+				return resultObject;
+			}
+		}else if(syntax.contains("kep") && syntax.contains("lech")){
+			isRightSyntax = syntax.matches(".*kep\\s*lech\\s*x[0-9]+\\s*(k|d)");
+			resultObject.Error = !isRightSyntax;
+			if(!isRightSyntax){
+				resultObject.MsgError = syntax;
+				return resultObject;
+			}
+		}else if(syntax.contains("kep") && syntax.contains("sat")){
+			isRightSyntax = syntax.matches(".*sat\\s*kep\\s*x[0-9]+\\s*(k|d)");
+			resultObject.Error = !isRightSyntax;
+			if(!isRightSyntax){
+				resultObject.MsgError = syntax;
+				return resultObject;
+			}
+		}else if((syntax.contains("lo") || syntax.contains("de")) && syntax.contains("100")){
+			isRightSyntax = syntax.matches(".*100\\s*so\\s*x[0-9]+\\s*(k|d)");
+			resultObject.Error = !isRightSyntax;
+			if(!isRightSyntax){
+				resultObject.MsgError = syntax;
+				return resultObject;
+			}
+		}else if(syntax.contains("tong") && syntax.contains("chia")){
+			isRightSyntax = syntax.matches(".*tong\\s*chia\\s*[ba3]+\\s*x[0-9]+\\s*(k|d)");
+			boolean isSyntaxDu1 = syntax.matches(".*tong\\s*chia\\s*[ba3\\+]+\\s*du\\s*[1mot]+\\s*x[0-9]+\\s*(k|d)");
+			boolean isSyntaxDu2 = syntax.matches(".*tong\\s*chia\\s*[ba3\\+]+\\s*du\\s*[2hai]+\\s*x[0-9]+\\s*(k|d)");
+			
+			resultObject.Error = !(isRightSyntax | isSyntaxDu1 | isSyntaxDu2);
+			if(!isRightSyntax){
+				resultObject.MsgError = syntax;
+				return resultObject;
+			}
+		}else if(syntax.contains("tong")){
+			isRightSyntax = syntax.matches(".*tong\\s*[0-9\\s]+x[0-9]+\\s*(k|d)");
+			resultObject.Error = !isRightSyntax;
+			if(!isRightSyntax){
+				resultObject.MsgError = syntax;
+				return resultObject;
+			}
+		}else if(syntax.replaceAll(" ", "").contains("toto") || syntax.replaceAll(" ", "").contains("nhonho")
+				|| syntax.replaceAll(" ", "").contains("nhoto") || syntax.replaceAll(" ", "").contains("tonho")){
+			isRightSyntax = syntax.matches(".*(nho\\s*nho|to\\s*to|nho\\s*to|to\\s*nho).*x[0-9]+\\s*(k|d)");
+			resultObject.Error = !isRightSyntax;
+			if(!isRightSyntax){
+				resultObject.MsgError = syntax;
+				return resultObject;
+			}
+		}
+		
+		return resultObject;
+	}
+	
+
+}

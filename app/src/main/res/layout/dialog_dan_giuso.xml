@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/dialog_bg"
+        android:orientation="vertical">
+
+        <RadioGroup
+            android:id="@+id/giuso_radiogroup"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <RadioButton
+                android:id="@+id/giuso_type1"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Lô,Đề" />
+
+            <RadioButton
+                android:id="@+id/giuso_type2"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="5dp"
+                android:layout_weight="1"
+                android:text="Xiên,3C" />
+
+            <RadioButton
+                android:id="@+id/giuso_type3"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="5dp"
+                android:text="Giữ từng khách"
+                android:visibility="gone" />
+        </RadioGroup>
+
+        <include
+            layout="@layout/dialog_dan_delo"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/giuso_radiogroup" />
+
+        <include
+            layout="@layout/dialog_dan_xienbacang"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/giuso_radiogroup" />
+
+        <include
+            layout="@layout/dialog_dan_giutungkhach"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/giuso_radiogroup" />
+    </RelativeLayout>
+</ScrollView>

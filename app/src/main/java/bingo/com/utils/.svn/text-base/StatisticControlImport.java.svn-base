@@ -1,0 +1,1220 @@
+package bingo.com.utils;
+
+import android.content.Context;
+import android.support.annotation.Nullable;
+import android.util.Log;
+
+import com.bingo.analyze.Analyze;
+import com.bingo.analyze.AnalyzeSMSNew;
+import com.bingo.analyze.NumberAndUnit;
+import com.bingo.analyze.calculation.BingoCalc;
+
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.List;
+import java.util.Locale;
+
+import bingo.com.enumtype.LotoType;
+import bingo.com.enumtype.TypeMessage;
+import bingo.com.helperdb.ContactDBHelper;
+import bingo.com.helperdb.FollowDBHelper;
+import bingo.com.helperdb.MessageDBHelper;
+import bingo.com.model.ContactModel;
+import bingo.com.model.FollowModel;
+import bingo.com.model.ResultReturnModel;
+import bingo.com.model.StatisticInfoModel;
+
+/**
+ * Created by kazinguyen on 4/27/17.
+ */
+public class StatisticControlImport {
+
+    public static final String MUST_SET_RESULT  = "MUST_SET_RESULT";
+
+
+    public static ResultReturnModel[] getResultTodayAndYesterday(Context context) {
+
+        Calendar calendar = Calendar.getInstance();
+
+        return getResultWithDay(context, calendar);
+    }
+
+    public static ResultReturnModel[] getResultWithDay(Context context, Calendar calendars) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(calendars.getTimeInMillis());
+
+        String today = getStringDate(calendar);
+        String toyear = String.valueOf(calendar.get(Calendar.YEAR));
+
+        calendar.add(Calendar.DATE, -1);
+
+        String yesterday = getStringDate(calendar);
+        String yesterdayYear = String.valueOf(calendar.get(Calendar.YEAR));
+
+        ResultReturnModel resultToday = LoaderSQLite.getResultFromDate(context, today, toyear, false);
+        //TODO de quy de lay ket qua ngay gan nhat khong null.
+        ResultReturnModel resultYesterday = LoaderSQLite.getResultFromDate(context, yesterday, yesterdayYear, false);
+
+        calendar.clear();
+
+        return new ResultReturnModel[]{resultToday, resultYesterday};
+    }
+
+    /*public static List<StatisticInfoModel> getListStatisticInfoModelFromStatisticCursor (final Context context, Cursor cursor) {
+
+        List<StatisticInfoModel> list = new ArrayList<>();
+
+        if (cursor != null && cursor.getCount() > 0)
+        {
+            cursor.moveToFirst();
+
+            while (!cursor.isAfterLast())
+            {
+                final String name = cursor.getString(cursor.getColumnIndex(MessageDatabase.NAME));
+                final String phone = cursor.getString(cursor.getColumnIndex(MessageDatabase.PHONE));
+//                final String rawContent = cursor.getString(cursor.getColumnIndex("mrawcontent"));
+                final String content = cursor.getString(cursor.getColumnIndex(MessageDatabase.CONTENT));
+                final String time = cursor.getString(cursor.getColumnIndex(MessageDatabase.TIME));
+                final String type = cursor.getString(cursor.getColumnIndex(MessageDatabase.TYPE));
+
+                list.add(new StatisticInfoModel() {
+                    @Override
+                    public String getName() {
+                        return name;
+                    }
+
+                    @Override
+                    public String getPhone() {
+                        return phone;
+                    }
+
+                    @Override
+                    public String getRawMessage() {
+                        return "";
+                    }
+
+                    @Override
+                    public String getMessageEditted() {
+                        return content;
+                    }
+
+                    @Override
+                    public String getTime() {
+                        return time;
+                    }
+
+                    @Override
+                    public TypeMessage getType() {
+                        return TypeMessage.valueOf(type);
+                    }
+
+                    @Override
+                    public ContactModel getConfig() {
+                        return LoaderSQLite.getConfigParameter(phone);
+                    }
+                });
+
+                cursor.moveToNext();
+            }
+        }
+
+        return list;
+    }*/
+
+    public static void setConfigForUser(ContactModel config) {
+        BingoCalc.HS_DE = config.getDITDB() / 1000d;
+        BingoCalc.HS_LO = config.getLO() / 1000d;
+        BingoCalc.HS_XIEN_2 = config.getXIEN2() / 1000d;
+        BingoCalc.HS_XIEN_3 = config.getXIEN3() / 1000d;
+        BingoCalc.HS_XIEN_4 = config.getXIEN4() / 1000d;
+
+        BingoCalc.HS_THANG_DE = (int) (config.getDITDB_LANAN() / 1000d);
+        BingoCalc.HS_THANG_LO = (int) (config.getLO_LANAN() / 1000d);
+        BingoCalc.HS_THANG_XIEN_2 = (int) (config.getXIEN2_LANAN() / 1000d);
+        BingoCalc.HS_THANG_XIEN_3 = (int) (config.getXIEN3_LANAN() / 1000d);
+        BingoCalc.HS_THANG_XIEN_4 = (int) (config.getXIEN4_LANAN() / 1000d);
+    }
+
+    /*public static String doStatistic(List<StatisticInfoModel> listInfo, ResultReturnModel[] resultTodayandYesterday, OnResponseCode listener, boolean manualKeepInsert) {
+        return doStatistic(listInfo, resultTodayandYesterday, listener, false, manualKeepInsert);
+    }
+
+    public static String doStatistic(List<StatisticInfoModel> listInfo, ResultReturnModel[] resultTodayandYesterday, OnResponseCode listener, boolean updateEachAnalyzeStatus, boolean manualKeepInsert) {
+
+        String error = null;
+
+        if (listInfo != null && listInfo.size() > 0)
+        {
+
+            ResultReturnModel modelToday = resultTodayandYesterday[0];
+            ResultReturnModel modelYesterday = resultTodayandYesterday[1];
+
+            List<String> phones = new ArrayList<>();
+            *//*List<String> rawContents = new ArrayList<>();*//*
+            List<String> times = new ArrayList<>();
+
+            for (StatisticInfoModel model : listInfo) {
+                if (modelYesterday != null)
+                {
+                    if (model.getConfig() != null)
+                    {
+                        setConfigForUser(model.getConfig());
+                    }
+
+                    error = statistic(model, modelToday == null ? null : modelToday.getBody(), modelYesterday.getBody(), updateEachAnalyzeStatus, manualKeepInsert);
+
+                    if (error != null)
+                    {
+                        MessageDBHelper.updateError(model.getPhone(), model.getTime(), error);
+                    }
+                }
+                else
+                {
+                    error = MUST_SET_RESULT;
+                }
+
+                phones.add(model.getPhone());
+                *//*rawContents.add(model.getRawMessage());*//*
+                times.add(model.getTime());
+            }
+
+            if (listener != null)
+            {
+                listener.onDoneSuccess(phones, times);
+            }
+
+            return error;
+        }
+
+        return null;
+    }
+
+    public static String statistic(StatisticInfoModel model, String todayResult, @NonNull String yesterdayResult, boolean updateEachAnalyzeStatus, boolean manualKeepInsert) {
+
+        AnalyzeSMS analyzeSMS = new AnalyzeSMS();
+
+        if (todayResult == null)
+        {
+            *//*ArrayList<NumberAndUnit> list = analyzeSMS.analyzeMessage(model.getMessageEditted(), yesterdayResult);
+
+            return insertDBIfNeedWithoutResult(list, model);*//*
+            return MUST_SET_RESULT;
+        }
+        else
+        {
+            ArrayList<Analyze> listPoint = analyzeSMS.bingoAnalyze(model.getMessageEditted(), todayResult, yesterdayResult);
+
+            return insertDBIfNeed(listPoint, model, updateEachAnalyzeStatus, manualKeepInsert);
+        }
+    }
+
+    private static String insertDBIfNeed(ArrayList<Analyze> listPoint, final StatisticInfoModel model, boolean updateEachAnalyzeStatus, boolean manualKeepInsert) {
+
+        String error = null;
+
+        for (final Analyze analyze : listPoint)
+        {
+            String e = importListByNumber(analyze, analyze.numberAndUnit, model, updateEachAnalyzeStatus, manualKeepInsert);
+
+            if (e != null)
+            {
+                if (error == null)
+                {
+                    error = "".concat(e);
+                }
+                else
+                {
+                    error = error.concat(Constant.SEPARATE).concat(e);
+                }
+            }
+        }
+
+        return error;
+    }
+
+    private static String importListByNumber(final Analyze analyze, final NumberAndUnit numberAndUnit, final StatisticInfoModel model, boolean updateEachAnalyzeStatus, boolean manualKeepInsert) {
+
+        if (numberAndUnit == null)
+        {
+            return analyze == null ? null : analyze.errorMessage;
+        }
+
+        *//*final int countNumHit = getCountNumberHit(analyze);*//*
+
+        for (final String arrNum : numberAndUnit.Numbers)
+        {
+            if (numberAndUnit.Type.contains("xq") || numberAndUnit.Type.contains("xien"))
+            {
+
+                Log.d("StatisticControlImport", "Import num: ---" + arrNum + "---");
+
+                FollowDBHelper.insertToFollowDatabase(getFollowModel(model, arrNum, analyze, numberAndUnit.Numbers.size(), numberAndUnit), manualKeepInsert);
+
+            }
+            else
+            {
+                final String[] arr = arrNum.split(Constant.REGEX_SEPARATE_NUMBER_ANALYZE);
+
+                for (final String num : arr) {
+
+                    Log.d("StatisticControlImport", "Import num: ---" + num + "---");
+
+                    FollowDBHelper.insertToFollowDatabase(getFollowModel(model, num, analyze, arr.length, numberAndUnit), manualKeepInsert);
+                }
+            }
+
+            //Update Status Analyze for each Message.
+            if (updateEachAnalyzeStatus)
+            {
+                MessageDBHelper.updateSingleMessageAnalyze(true, model.getPhone(), model.getTime());
+            }
+        }
+
+        return null;
+    }*/
+
+
+    private static String buildTypeNumber(String origin, String num) {
+        String build = origin;
+
+        if (build.contains("xien") || build.contains("xq"))
+        {
+            build = "xien".concat(String.valueOf(num.split(Constant.REGEX_SEPARATE_NUMBER_ANALYZE).length));
+        }
+
+        return build;
+    }
+
+    public static String analyzeSingleMessage(String name, String phone, String content, String time, TypeMessage type, ResultReturnModel[] results, boolean receiveDe, boolean receiveLo, boolean hasDeliver) {
+        ContactModel config = LoaderSQLite.getConfigParameter(phone);
+        setConfigForUser(config);
+
+        String todayResult = results[0].getBody();
+        String yesterdayResult = results[1].getBody();
+
+        String error = null;
+
+        AnalyzeSMSNew analyzeSMS = new AnalyzeSMSNew();
+
+        if (todayResult != null)
+        {
+            ArrayList<Analyze> listPoint = analyzeSMS.bingoAnalyze(content, todayResult, yesterdayResult);
+
+            for (final Analyze analyze : listPoint)
+            {
+                String e = importResultAnalyze(name, phone, content, time, type, analyze.numberAndUnit, analyze, config, receiveDe, receiveLo, hasDeliver);
+
+                if (e != null)
+                {
+                    if (error == null)
+                    {
+                        error = "".concat(e);
+                    }
+                    else
+                    {
+                        error = error.concat(Constant.SEPARATE).concat(e);
+                    }
+                }
+            }
+        }
+
+        //Change error message field.
+        if (error != null)
+        {
+            MessageDBHelper.updateError(phone, time, error);
+
+            int row = MessageDBHelper.updateSingleMessageAnalyze(false, phone, time);
+            Log.d("StatisticControlImport", "Update Analyze Status = false for " + phone + " in row " + row);
+        }
+        else
+        {
+            MessageDBHelper.updateError(phone, time, "");
+
+            //Update Status Analyze for each Message.
+            int row = MessageDBHelper.updateSingleMessageAnalyze(true, phone, time);
+            Log.d("StatisticControlImport", "Update Analyze Status = true for " + phone + " in row " + row);
+        }
+
+        return error;
+    }
+
+    private static String importResultAnalyze(String name, String phone, String content, String time, TypeMessage type, NumberAndUnit numberAndUnit, Analyze analyze, ContactModel config, boolean receiveDe, boolean receiveLo, boolean hasDeliver) {
+        if (numberAndUnit == null)
+        {
+            return analyze == null ? null : analyze.errorMessage;
+        }
+
+        //Check time to import number.
+        if (numberAndUnit.Type.contains("de"))
+        {
+            if (!receiveDe)
+                return null;
+        }
+        else
+        {
+            if (!receiveLo)
+                return null;
+        }
+
+
+        for (final String arrNum : numberAndUnit.Numbers)
+        {
+            if (numberAndUnit.Type.contains("xq") || numberAndUnit.Type.contains("xien"))
+            {
+
+                Log.d("StatisticControlImport", "Import num: ---" + arrNum + "---");
+
+                FollowModel model = convertToModel(name, phone, content, time, type, arrNum, analyze, numberAndUnit.Numbers.size(), numberAndUnit);
+
+                FollowDBHelper.insertToFollowDatabase(model, false);
+
+                //Just keep each message come when not deliver.
+
+                if (!hasDeliver)
+                {
+                    double hs = getHeSo(config, model.getType());
+
+                    int max = (int) config.getMax(LotoType.convert(model.getType()));
+
+                    if (hs != 0d)
+                    {
+                        FollowModel modelKeep = cloneModelWithPercent(model, hs, max);
+
+                        if (modelKeep != null)
+                        {
+                            FollowDBHelper.insertToFollowDatabase(modelKeep, false);
+                        }
+                    }
+
+                    insertKeepXien(model, config);
+                }
+            }
+            else
+            {
+                final String[] arr = arrNum.split(Constant.REGEX_SEPARATE_NUMBER_ANALYZE);
+
+                for (final String num : arr) {
+
+                    Log.d("StatisticControlImport", "Import num: ---" + num + "---");
+
+                    FollowModel model = convertToModel(name, phone, content, time, type, num, analyze, arr.length, numberAndUnit);
+
+                    FollowDBHelper.insertToFollowDatabase(model, false);
+
+                    //Just keep each message come when not deliver.
+
+                    if (!hasDeliver)
+                    {
+                        double hs = getHeSo(config, model.getType());
+
+                        int max = (int) config.getMax(LotoType.convert(model.getType()));
+
+                        if (hs != 0d)
+                        {
+                            FollowModel modelKeep = cloneModelWithPercent(model, hs, max);
+
+                            if (modelKeep != null)
+                            {
+                                FollowDBHelper.insertToFollowDatabase(modelKeep, false);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return null;
+    }
+
+    private static void insertKeepXien(final FollowModel model, final ContactModel config) {
+
+        final String type = model.getType();
+
+        String number = model.getNumber();
+
+
+        Double dou = config.getDiemGiu(LotoType.convert(type));
+
+        final double price = dou == null ? 0 : dou;
+
+        final String unit = "n";
+
+        if (price != 0)
+        {
+            final String finalNumber = number;
+            FollowDBHelper.insertKeepValueNotConflict(new FollowModel() {
+                @Override
+                public String getName() {
+                    return Constant.UNKNOWN_NAME;
+                }
+
+                @Override
+                public String getPhone() {
+                    return Constant.UNKNOWN_PHONE_GIUXIEN;
+                }
+
+                @Override
+                public String getNumber() {
+                    return finalNumber;
+                }
+
+                @Override
+                public String getContent() {
+                    return "";
+                }
+
+                @Override
+                public double getAmountPoint() {
+                    return /*price*/ 0;
+                }
+
+                @Override
+                public String getUnit() {
+                    return unit;
+                }
+
+                @Override
+                public String getPrice() {
+                    return String.valueOf(price);
+                }
+
+                @Override
+                public String getActualCollect() {
+                    return "0";
+                }
+
+                @Override
+                public int getCountWin() {
+                    return 0;
+                }
+
+                @Override
+                public String getPointWin() {
+                    return "";
+                }
+
+                @Override
+                public String getGuestWin() {
+                    return "";
+                }
+
+                @Override
+                public String getType() {
+                    return type;
+                }
+
+                @Override
+                public String getTime() {
+                    return Utils.getNewTimeFrom(model.getTime());
+                }
+
+                @Override
+                public TypeMessage getMessageType() {
+                    return TypeMessage.KEEP;
+                }
+
+                @Override
+                public String getWinSyntax() {
+                    return "";
+                }
+
+                @Override
+                public String getErrorMessage() {
+                    return "";
+                }
+            });
+        }
+
+    }
+
+    public static double getHeSo(ContactModel config, String type) {
+
+        return config.getHesogiu(LotoType.convert(type));
+    }
+
+    private static FollowModel convertToModel(final String name, final String phone, final String content, final String time, final TypeMessage type, final String num, final Analyze analyze, final int amtSize, final NumberAndUnit numberAndUnit) {
+        final ContactModel config = LoaderSQLite.getConfigParameter(phone);
+
+        return new FollowModel() {
+            @Override
+            public String getName() {
+                return name;
+            }
+
+            @Override
+            public String getPhone() {
+                return phone;
+            }
+
+            @Override
+            public String getNumber() {
+                return num.trim();
+            }
+
+            @Override
+            public String getContent() {
+                return content;
+            }
+
+            @Override
+            public double getAmountPoint() {
+                return /*analyze.amountPoint == 0 ? 0 : (numberAndUnit.Type.contains(LotoType.lo.name()) ? (Double.parseDouble(numberAndUnit.Price) * config.getLO() / 1000d) : (analyze.amountPoint / amtSize))*/ 0;
+            }
+
+            @Override
+            public String getUnit() {
+                return numberAndUnit.Unit;
+            }
+
+            @Override
+            public String getPrice() {
+                return numberAndUnit.Price;
+            }
+
+            @Override
+            public String getActualCollect() {
+                return /*analyze == null || analyze.actuallyCollected == null ? "0" : Formats.formatBigDecimal((analyze.actuallyCollected).divide(new BigDecimal(*//*countNumHit*//*amtSize), 2, RoundingMode.HALF_UP))*/ "0";
+            }
+
+            @Override
+            public int getCountWin() {
+                return /*analyze == null ? 0 : getCountSubstring(num, analyze.winNumber)*/ 0;
+            }
+
+            @Override
+            public String getPointWin() {
+                return /*StatisticControlImport.getPointWin(num, analyze)*/ "0";
+            }
+
+            @Override
+            public String getGuestWin() {
+                return /*analyze == null ? "0" : calGuestWin(num, analyze.winNumber, analyze.guestWin)*/ "0";
+            }
+
+            @Override
+            public String getType() {
+                return buildTypeNumber(numberAndUnit.Type, num.trim());
+            }
+
+            @Override
+            public String getTime() {
+                return time;
+            }
+
+            @Override
+            public TypeMessage getMessageType() {
+                return type;
+            }
+
+            @Override
+            public String getWinSyntax() {
+                return /*analyze.winSyntax*/ "";
+            }
+
+            @Override
+            public String getErrorMessage() {
+                return analyze == null ? null : analyze.errorMessage;
+            }
+        };
+    }
+
+    @Nullable
+    private static FollowModel cloneModelWithPercent(final FollowModel model, final double percent, int max) {
+        double price = Double.parseDouble(model.getPrice()) * percent;
+
+        int currentPrice = FollowDBHelper.getSumKeepValueOfNumberMF(model.getNumber(), model.getType(), model.getPhone());
+
+        if (max != 0)
+        {
+            if (max > currentPrice)
+            {
+                max = max - currentPrice;
+
+                if (price > max)
+                {
+                    price = max;
+                }
+            }
+            else
+            {
+                return null;
+            }
+        }
+
+        final String finalPrice = String.valueOf(price);
+
+        return new FollowModel() {
+            @Override
+            public String getName() {
+                return model.getName();
+            }
+
+            @Override
+            public String getPhone() {
+                return model.getPhone();
+            }
+
+            @Override
+            public String getNumber() {
+                return model.getNumber();
+            }
+
+            @Override
+            public String getContent() {
+                return model.getContent();
+            }
+
+            @Override
+            public double getAmountPoint() {
+                return /*model.getAmountPoint() * percent*/ 0;
+            }
+
+            @Override
+            public String getUnit() {
+                return model.getUnit();
+            }
+
+            @Override
+            public String getPrice() {
+                return finalPrice;
+            }
+
+            @Override
+            public String getActualCollect() {
+                return /*String.valueOf(Double.parseDouble(model.getActualCollect()) * percent)*/ "0";
+            }
+
+            @Override
+            public int getCountWin() {
+                return /*model.getCountWin()*/ 0;
+            }
+
+            @Override
+            public String getPointWin() {
+                return /*String.valueOf(Double.parseDouble(model.getPointWin()) * percent)*/ "0";
+            }
+
+            @Override
+            public String getGuestWin() {
+                return /*String.valueOf(Double.parseDouble(model.getGuestWin()) * percent)*/ "0";
+            }
+
+            @Override
+            public String getType() {
+                return model.getType();
+            }
+
+            @Override
+            public String getTime() {
+                return Utils.getNewTimeFrom(model.getTime());
+            }
+
+            @Override
+            public TypeMessage getMessageType() {
+                return TypeMessage.KEEP;
+            }
+
+            @Override
+            public String getWinSyntax() {
+                return model.getWinSyntax();
+            }
+
+            @Override
+            public String getErrorMessage() {
+                return model.getErrorMessage();
+            }
+        };
+    }
+
+    public static String getPointWin(String num, String type, String price, String winNumber) {
+
+        if (type.equalsIgnoreCase("lo"))
+        {
+            return String.valueOf(Double.parseDouble(price) * getCountSubstring(num, winNumber));
+        }
+        else
+        {
+            return getCountSubstring(num, winNumber) > 0 ? price : "0";
+        }
+    }
+
+    /*private static String getPointXqWin(String num, Analyze analyze) {
+        if (analyze == null) return "0";
+
+        if (analyze.numberAndUnit.Type.equalsIgnoreCase("lo"))
+        {
+            return String.valueOf(Double.parseDouble(analyze.numberAndUnit.Price) * getCountXqResult(num, analyze.winNumber));
+        }
+        else
+        {
+            return getCountSubstring(num, analyze.winNumber) > 0 ? analyze.numberAndUnit.Price : "0";
+        }
+    }*/
+
+    /*private static int getCountNumberHit(Analyze analyze) {
+        int count = 0;
+
+        if (analyze.numberAndUnit == null)
+        {
+            return count;
+        }
+
+        for (String arrNum : analyze.numberAndUnit.Numbers)
+        {
+            String[] arr = arrNum.split(Constant.REGEX_SEPARATE_NUMBER_ANALYZE);
+            count += arr.length;
+        }
+
+        return count;
+    }*/
+
+    public static int getCountSubstring(String sub, String all) {
+        if (sub == null || all == null) return 0;
+
+        return (all.length() - all.replace(sub, "").length()) / sub.length();
+    }
+
+    private static int getCountXqResult(String sub, String all) {
+        if (sub == null || all == null) return 0;
+
+        String[] arr = sub.split(Constant.REGEX_SEPARATE_NUMBER_ANALYZE);
+        ArrayList<Integer> result = new ArrayList<>();
+
+        for (String s : arr)
+        {
+            result.add((all.length() - all.replace(s, "").length()) / s.length());
+        }
+
+        return Collections.min(result);
+    }
+
+    private static String calGuestWin(String num, String winNumber, BigDecimal guestWin) {
+        if (winNumber == null || guestWin == null) return "0";
+
+        int countNumWin = winNumber.split(Constant.REGEX_SEPARATE_NUMBER_ANALYZE).length;
+
+        int countWin = getCountSubstring(num, winNumber);
+
+        return (guestWin.divide(new BigDecimal(countNumWin), 2, RoundingMode.HALF_UP)).multiply(new BigDecimal(countWin)).toString();
+    }
+
+    private static String calGuestXqWin(String num, String winNumber, BigDecimal guestWin) {
+        if (winNumber == null || guestWin == null) return "0";
+
+        int countNumWin = winNumber.split(Constant.REGEX_SEPARATE_NUMBER_ANALYZE).length;
+
+        int countWin = getCountXqResult(num, winNumber);
+
+        return (guestWin.divide(new BigDecimal(countNumWin), 2, RoundingMode.HALF_UP)).multiply(new BigDecimal(countWin)).toString();
+    }
+
+    private static String getStringDate(Calendar calendar) {
+        SimpleDateFormat format = new SimpleDateFormat("dd/MM", Locale.US);
+
+        return format.format(calendar.getTime());
+    }
+
+    //---- Keep
+    public static String importKeep(final String name, final String phone, final String time, final String message, final ResultReturnModel[] result, final TypeMessage type) {
+        return importKeep(name, phone, time, message, result, type, true);
+    }
+
+    public static String importKeep(final String name, final String phone, final String time, final String message, final ResultReturnModel[] result, final TypeMessage type, final boolean deleteOlds) {
+
+        //Delete Old Keep value.
+        if (type == TypeMessage.KEEP && deleteOlds)
+        {
+            int row = FollowDBHelper.deleteKeepValue(phone, TypeMessage.KEEP);
+        }
+
+        //Import new Value.
+        final StatisticInfoModel model = new StatisticInfoModel() {
+            @Override
+            public String getName() {
+                return name;
+            }
+
+            @Override
+            public String getPhone() {
+                return phone;
+            }
+
+            @Override
+            public String getRawMessage() {
+                return message;
+            }
+
+            @Override
+            public String getMessageEditted() {
+                return message;
+            }
+
+            @Override
+            public String getTime() {
+                return time;
+            }
+
+            @Override
+            public TypeMessage getType() {
+                return type;
+            }
+
+            @Override
+            public ContactModel getConfig() {
+                return ContactDBHelper.getFullContact(phone);
+            }
+        };
+
+        //Set config for user. It will null for xuat so by facebook, zalo...
+        //That's not important to set config when is xuatso.
+        if (model.getConfig() != null)
+            setConfigForUser(model.getConfig());
+
+        AnalyzeSMSNew analyzeSMS = new AnalyzeSMSNew();
+
+        ArrayList<Analyze> listPoint = analyzeSMS.bingoAnalyze(message, result[0].getBody(), result[1].getBody());
+
+        String error = null;
+
+        for (final Analyze analyze : listPoint)
+        {
+            if (analyze.numberAndUnit == null)
+            {
+                error = analyze.errorMessage;
+
+                Log.d("StatisticControlImport", "Import Keep: Error= " + error);
+
+                return error;
+            }
+
+            NumberAndUnit numberAndUnit = analyze.numberAndUnit;
+
+            for (final String arrNum : numberAndUnit.Numbers)
+            {
+                if (numberAndUnit.Type.contains("xq") || numberAndUnit.Type.contains("xien"))
+                {
+
+                    Log.d("StatisticControlImport", "Import num: " + numberAndUnit.Type + "---" + arrNum + "---" + numberAndUnit.Price);
+
+                    FollowDBHelper.insertKeepValueNotConflict(getFollowModel(model, arrNum, analyze, numberAndUnit.Numbers.size(), numberAndUnit));
+
+                }
+                else
+                {
+                    final String[] arr = arrNum.split(Constant.REGEX_SEPARATE_NUMBER_ANALYZE);
+
+                    for (final String num : arr)
+                    {
+
+                        Log.d("StatisticControlImport", "Import num: " + numberAndUnit.Type + "---" + num + "---" + numberAndUnit.Price);
+
+                        FollowDBHelper.insertKeepValueNotConflict(getFollowModel(model, num, analyze, arr.length, numberAndUnit));
+                    }
+                }
+            }
+        }
+
+        FollowDBHelper.reUpdateSumCache();
+
+        return error;
+    }
+
+    //----Sua dan-----
+    //Only use for sua dan function.
+    public static String importSuadan(final String name, final String message, final String time, final ResultReturnModel[] result) {
+
+        //Delete Old Keep value of sua dan.
+        FollowDBHelper.deleteKeepValue(Constant.UNKNOWN_PHONE_GIUDE, TypeMessage.KEEP);
+
+        final String mesSave = message.replaceAll(LotoType.de.name(), "").replaceAll(LotoType.lo.name(), "").trim();
+
+        //Import new Value.
+        final StatisticInfoModel model = new StatisticInfoModel() {
+            @Override
+            public String getName() {
+                return name;
+            }
+
+            @Override
+            public String getPhone() {
+                return Constant.UNKNOWN_PHONE_GIUDE;
+            }
+
+            @Override
+            public String getRawMessage() {
+                return mesSave;
+            }
+
+            @Override
+            public String getMessageEditted() {
+                return mesSave;
+            }
+
+            @Override
+            public String getTime() {
+                return time;
+            }
+
+            @Override
+            public TypeMessage getType() {
+                return TypeMessage.KEEP;
+            }
+
+            @Override
+            public ContactModel getConfig() {
+                return null;
+            }
+        };
+
+        /*setConfigForUser(model.getConfig());*/
+
+        AnalyzeSMSNew analyzeSMS = new AnalyzeSMSNew();
+
+        ArrayList<Analyze> listPoint = analyzeSMS.bingoAnalyze(message, result[0].getBody(), result[1].getBody());
+
+        String error = null;
+
+        for (final Analyze analyze : listPoint)
+        {
+            if (analyze.numberAndUnit == null)
+            {
+                error = analyze.errorMessage;
+
+                Log.d("StatisticControlImport", "Import Keep: Error= " + error);
+
+                return error;
+            }
+
+            NumberAndUnit numberAndUnit = analyze.numberAndUnit;
+
+            for (final String arrNum : numberAndUnit.Numbers)
+            {
+                if (numberAndUnit.Type.contains("xq") || numberAndUnit.Type.contains("xien"))
+                {
+                    /*Log.d("StatisticControlImport", "Import num: ---" + arrNum + "---" + numberAndUnit.Price);
+
+                    FollowDBHelper.insertSuaDanValue(getFollowModel(model, arrNum, analyze, numberAndUnit.Numbers.size(), numberAndUnit));*/
+
+                    continue;
+                }
+                else
+                {
+                    final String[] arr = arrNum.split(Constant.REGEX_SEPARATE_NUMBER_ANALYZE);
+
+                    for (final String num : arr)
+                    {
+
+                        Log.d("StatisticControlImport", "Import num: ---" + num + "---" + numberAndUnit.Price);
+
+                        FollowDBHelper.insertSuaDanValue(getFollowModel(model, num, analyze, arr.length, numberAndUnit));
+                    }
+                }
+            }
+        }
+
+        FollowDBHelper.reUpdateSumCache();
+
+        return error;
+    }
+
+    private static FollowModel getFollowModel(final StatisticInfoModel model, final String num, final Analyze analyze, final int amtSize, final NumberAndUnit numberAndUnit) {
+        final ContactModel config = LoaderSQLite.getConfigParameter(model.getPhone());
+
+        return new FollowModel() {
+            @Override
+            public String getName() {
+                return model.getName();
+            }
+
+            @Override
+            public String getPhone() {
+                return model.getPhone();
+            }
+
+            @Override
+            public String getNumber() {
+                return num.trim();
+            }
+
+            @Override
+            public String getContent() {
+                return model.getMessageEditted();
+            }
+
+            @Override
+            public double getAmountPoint() {
+                return analyze.amountPoint == 0 ? 0 : (numberAndUnit.Type.contains(LotoType.lo.name()) ? (Double.parseDouble(numberAndUnit.Price) * config.getLO() / 1000d) : (analyze.amountPoint / amtSize));
+            }
+
+            @Override
+            public String getUnit() {
+                return numberAndUnit.Unit;
+            }
+
+            @Override
+            public String getPrice() {
+                return numberAndUnit.Price;
+            }
+
+            @Override
+            public String getActualCollect() {
+                return analyze == null || analyze.actuallyCollected == null ? "" : Formats.formatBigDecimal((analyze.actuallyCollected).divide(new BigDecimal(/*countNumHit*/amtSize), 2, RoundingMode.HALF_UP));
+            }
+
+            @Override
+            public int getCountWin() {
+                return /*analyze == null ? 0 : getCountSubstring(num, analyze.winNumber)*/ 0;
+            }
+
+            @Override
+            public String getPointWin() {
+                return /*StatisticControlImport.getPointWin(num, analyze)*/ "0";
+            }
+
+            @Override
+            public String getGuestWin() {
+                return /*analyze == null ? "0" : calGuestWin(num, analyze.winNumber, analyze.guestWin)*/ "0";
+            }
+
+            @Override
+            public String getType() {
+                return buildTypeNumber(numberAndUnit.Type, num.trim());
+            }
+
+            @Override
+            public String getTime() {
+                return model.getTime();
+            }
+
+            @Override
+            public TypeMessage getMessageType() {
+                return model.getType();
+            }
+
+            @Override
+            public String getWinSyntax() {
+                return analyze.winSyntax;
+            }
+
+            @Override
+            public String getErrorMessage() {
+                return analyze == null ? null : analyze.errorMessage;
+            }
+        };
+    }
+
+    public static void importKeepValue(final String name, final String phone, final String number, String sPrice, final String type, final String time, final String unit, double percent, int max) {
+        double price = Double.parseDouble(sPrice) * percent;
+
+        int currentPrice = FollowDBHelper.getSumReceivedValueOfNumberMF(number, type, phone);
+
+        if (max > currentPrice)
+        {
+            max = max - currentPrice;
+
+            if (price > max)
+            {
+                price = max;
+            }
+        }
+        else
+        {
+            return;
+        }
+
+        final String finalPrice = String.valueOf(price);
+
+        FollowModel followModel = new FollowModel() {
+            @Override
+            public String getName() {
+                return name;
+            }
+
+            @Override
+            public String getPhone() {
+                return phone;
+            }
+
+            @Override
+            public String getNumber() {
+                return number;
+            }
+
+            @Override
+            public String getContent() {
+                return "";
+            }
+
+            @Override
+            public double getAmountPoint() {
+                return /*model.getAmountPoint() * percent*/ 0;
+            }
+
+            @Override
+            public String getUnit() {
+                return unit;
+            }
+
+            @Override
+            public String getPrice() {
+                return finalPrice;
+            }
+
+            @Override
+            public String getActualCollect() {
+                return "0";
+            }
+
+            @Override
+            public int getCountWin() {
+                return 0;
+            }
+
+            @Override
+            public String getPointWin() {
+                return "0";
+            }
+
+            @Override
+            public String getGuestWin() {
+                return "0";
+            }
+
+            @Override
+            public String getType() {
+                return type;
+            }
+
+            @Override
+            public String getTime() {
+                return time;
+            }
+
+            @Override
+            public TypeMessage getMessageType() {
+                return TypeMessage.KEEP;
+            }
+
+            @Override
+            public String getWinSyntax() {
+                return "";
+            }
+
+            @Override
+            public String getErrorMessage() {
+                return "";
+            }
+        };
+
+        FollowDBHelper.insertKeepValueNotConflict(followModel);
+    }
+
+    public interface OnResponseCode {
+
+        boolean onDoneSuccess(List<String> phones, List<String> times);
+    }
+}

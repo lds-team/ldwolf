@@ -1,0 +1,41 @@
+K 25
+svn:wc:ra_dav:version-url
+V 81
+/svn/BINGO/!svn/ver/155/BingoNew/BingoNew/app/src/main/java/bingo/com/helperdb/db
+END
+TempleMsgDatabase.java
+K 25
+svn:wc:ra_dav:version-url
+V 104
+/svn/BINGO/!svn/ver/153/BingoNew/BingoNew/app/src/main/java/bingo/com/helperdb/db/TempleMsgDatabase.java
+END
+FollowDatabase.java
+K 25
+svn:wc:ra_dav:version-url
+V 101
+/svn/BINGO/!svn/ver/161/BingoNew/BingoNew/app/src/main/java/bingo/com/helperdb/db/FollowDatabase.java
+END
+ContactDatabase.java
+K 25
+svn:wc:ra_dav:version-url
+V 102
+/svn/BINGO/!svn/ver/154/BingoNew/BingoNew/app/src/main/java/bingo/com/helperdb/db/ContactDatabase.java
+END
+LotoMsgProvider.java
+K 25
+svn:wc:ra_dav:version-url
+V 102
+/svn/BINGO/!svn/ver/130/BingoNew/BingoNew/app/src/main/java/bingo/com/helperdb/db/LotoMsgProvider.java
+END
+MessageDatabase.java
+K 25
+svn:wc:ra_dav:version-url
+V 102
+/svn/BINGO/!svn/ver/159/BingoNew/BingoNew/app/src/main/java/bingo/com/helperdb/db/MessageDatabase.java
+END
+CongnoDatabase.java
+K 25
+svn:wc:ra_dav:version-url
+V 101
+/svn/BINGO/!svn/ver/130/BingoNew/BingoNew/app/src/main/java/bingo/com/helperdb/db/CongnoDatabase.java
+END

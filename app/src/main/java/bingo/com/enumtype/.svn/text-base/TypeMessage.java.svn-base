@@ -1,0 +1,23 @@
+package bingo.com.enumtype;
+
+/**
+ * Created by kazinguyen on 6/19/17.
+ */
+public enum TypeMessage {
+
+    SENT,
+    RECEIVED,
+    SMS,
+    KEEP;
+
+    public static TypeMessage convert(String type) {
+        if (type.equals(SENT.name()))
+            return SENT;
+        else if (type.equals(RECEIVED.name()))
+            return RECEIVED;
+        else if (type.equals(SMS.name()))
+            return SMS;
+        else
+            return KEEP;
+    }
+}

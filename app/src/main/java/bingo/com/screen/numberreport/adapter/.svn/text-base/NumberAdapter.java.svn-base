@@ -1,0 +1,116 @@
+package bingo.com.screen.numberreport.adapter;
+
+import android.content.Context;
+import android.database.Cursor;
+import android.support.design.widget.BaseTransientBottomBar;
+import android.support.design.widget.Snackbar;
+import android.support.v7.widget.RecyclerView;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.TextView;
+
+import bingo.com.R;
+import bingo.com.base.baseadapter.BaseCursorRecyclerAdapter;
+import bingo.com.base.baseview.BaseRecyclerViewHolder;
+import bingo.com.helperdb.FollowDBHelper;
+import bingo.com.helperdb.db.FollowDatabase;
+import butterknife.Bind;
+
+/**
+ * Created by kazinguyen on 6/15/17.
+ */
+public class NumberAdapter extends BaseCursorRecyclerAdapter<NumberAdapter.ViewHolder> {
+
+    private Context context;
+
+    public NumberAdapter(Context context, Cursor cursor) {
+        super(context, cursor);
+
+        this.context = context;
+    }
+
+    @Override
+    public void onBindViewHolder(ViewHolder viewHolder, Cursor cursor) {
+        String number = cursor.getString(cursor.getColumnIndex(FollowDatabase.DETAIL_NUMBER));
+
+        //TODO Must to find root cause. Error while import data keep.
+        int chuyen;
+        int giu;
+        int nhan;
+
+        String type = cursor.getString(cursor.getColumnIndex(FollowDatabase.DETAIL_TYPE));
+
+        chuyen = FollowDBHelper.getSumSentValueOfNumber(number, type);
+        giu = FollowDBHelper.getSumKeepValueOfNumber(number, type);
+        nhan = FollowDBHelper.getSumReceivedValueOfNumber(number, type);
+
+        String ton = String.valueOf(nhan - chuyen - giu);
+
+        viewHolder.setValue(
+                String.valueOf(cursor.getPosition() + 1),
+                number,
+                String.valueOf(nhan),
+                String.valueOf(giu),
+                String.valueOf(chuyen),
+                ton
+        );
+    }
+
+    @Override
+    public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        View view = View.inflate(context, R.layout.item_numberadapter, null);
+        //Hot fix for issue not full screen width. Remove at the feature.
+        //TODO : This fix will make slowdown the scrolling RecyclerView.
+        view.setLayoutParams(new RecyclerView.LayoutParams(RecyclerView.LayoutParams.MATCH_PARENT, RecyclerView.LayoutParams.WRAP_CONTENT));
+
+        return new ViewHolder(view);
+    }
+
+    class ViewHolder extends BaseRecyclerViewHolder {
+
+        @Bind(R.id.item_numberadapter_id)
+        TextView id;
+
+        @Bind(R.id.item_numberadapter_so)
+        TextView chon;
+
+        @Bind(R.id.item_numberadapter_nhan)
+        TextView nhan;
+
+        @Bind(R.id.item_numberadapter_giu)
+        TextView giu;
+
+        @Bind(R.id.item_numberadapter_chuyen)
+        TextView chuyen;
+
+        @Bind(R.id.item_numberadapter_ton)
+        TextView ton;
+
+        public ViewHolder(final View itemView) {
+            super(itemView);
+
+            itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    getCursor().moveToPosition(getLayoutPosition());
+
+                    String number = getCursor().getString(getCursor().getColumnIndex(FollowDatabase.DETAIL_NUMBER));
+                    String type = getCursor().getString(getCursor().getColumnIndex(FollowDatabase.DETAIL_TYPE));
+
+                    String s = FollowDBHelper.getAllPhoneFromNumber(number, type);
+
+                    Snackbar.make(itemView, s, BaseTransientBottomBar.LENGTH_SHORT).show();
+                }
+            });
+        }
+
+        private void setValue(String id, String chon, String nhan, String giu, String chuyen, String ton) {
+            this.id.setText(id);
+            this.chon.setText(chon);
+            this.nhan.setText(nhan);
+            this.giu.setText(giu);
+            this.chuyen.setText(chuyen);
+            this.ton.setText(ton);
+        }
+    }
+}

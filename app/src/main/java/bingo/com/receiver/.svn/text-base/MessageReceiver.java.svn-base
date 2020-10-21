@@ -1,0 +1,249 @@
+package bingo.com.receiver;
+
+import android.content.ContentResolver;
+import android.content.ContentValues;
+import android.content.Context;
+import android.content.Intent;
+import android.database.Cursor;
+import android.net.Uri;
+import android.os.Bundle;
+import android.telephony.SmsMessage;
+import android.text.TextUtils;
+import android.util.Log;
+
+import java.text.Format;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
+import java.util.Locale;
+
+import bingo.com.BuildConfig;
+import bingo.com.async.CommonTask;
+import bingo.com.base.BaseReceiver;
+import bingo.com.enumtype.TypeMessage;
+import bingo.com.helperdb.ContactDBHelper;
+import bingo.com.helperdb.MessageDBHelper;
+import bingo.com.helperdb.db.LotoMsgProvider;
+import bingo.com.model.ChooseMessage;
+import bingo.com.model.LotoMessage;
+import bingo.com.model.ResultModel;
+import bingo.com.model.ResultReturnModel;
+import bingo.com.screen.configscreen.SettingsHelper;
+import bingo.com.utils.LoaderSQLite;
+import bingo.com.utils.StatisticControlImport;
+import bingo.com.utils.Utils;
+
+/**
+ * Created by KaziNguyen on 28/06/2017.
+ */
+public class MessageReceiver extends BaseReceiver {
+
+    private static final String SMS_RECEIVED = "android.provider.Telephony.SMS_RECEIVED";
+    private static final String SMS_SENT = "android.provider.Telephony.SMS_SENT";
+    private static final String TAG = "MessageReceiver";
+
+    private List<LotoMessage> lsLotoMessage;
+
+    @Override
+    public void onReceive(Context context, Intent intent) {
+        Log.d(TAG, "Intent received: " + intent.getAction());
+
+        if (intent.getAction().equals(SMS_RECEIVED))
+        {
+            extractIntent(context, intent, TypeMessage.RECEIVED);
+        }
+        else if (intent.getAction().equals(SMS_SENT))
+        {
+            /*extractIntent(context, intent, TypeMessage.SENT);*/
+        }
+        else
+        {
+            //Nothing
+        }
+
+    }
+
+    private void extractIntent(final Context context, Intent intent, final TypeMessage type) {
+        Bundle bundle = intent.getExtras();
+        if (bundle != null)
+        {
+            Object[] pdus = (Object[]) bundle.get("pdus");
+            final SmsMessage[] messages = new SmsMessage[pdus.length];
+            for (int i = 0; i < pdus.length; i++)
+            {
+                messages[i] = SmsMessage.createFromPdu((byte[]) pdus[i]);
+            }
+
+            //TODO case 1 message received once time.
+            if (messages.length > 0)
+            {
+                //Case message length > 160;
+                StringBuilder content = new StringBuilder();
+                    for (SmsMessage message : messages)
+                    {
+                        content.append(message.getMessageBody());
+                    }
+
+                String mySmsText = content.toString();
+                String phone = messages[0].getDisplayOriginatingAddress();
+
+                if ((phone.contains("8085") || phone.contains("997")) && (phone.length() < 9))
+                {
+                    importKetqua(context, phone, mySmsText, messages[0].getTimestampMillis());
+                }
+                else
+                {
+                    analyzeMessage(context, mySmsText, phone,  messages[0].getTimestampMillis(), type);
+                }
+            }
+        }
+    }
+
+    private void analyzeMessage(Context context, String content, String rawPhone, long timeMessage, TypeMessage type) {
+        long timeDe = Utils.getTimeFromConfig(SettingsHelper.getTimeReceiveDe(getSaved(context)));
+        long timeLo = Utils.getTimeFromConfig(SettingsHelper.getTimeReceiveLoXien(getSaved(context)));
+
+        long timeEnd = Math.max(timeDe, timeLo);
+
+        if (timeEnd < timeMessage) //Not receive message over time.
+            return;
+
+        String phone = Utils.fixPhone(rawPhone);
+        String name = ContactDBHelper.getName(phone);
+
+        if (name == null) //This case to choose what contact in app db.
+            return;
+
+        //TODO get time here will be different with load from content provider SMS.
+        //That mean if get time from here, must only to received message here.
+        //Add Message To Db.
+        MessageDBHelper.addMessage(new ChooseMessage(
+                name,
+                phone,
+                String.valueOf(timeMessage),
+                content,
+                type.name()
+        ));
+
+        ResultReturnModel[] result = StatisticControlImport.getResultTodayAndYesterday(context.getApplicationContext());
+        startAnalyze(context, name, phone, content, timeMessage, type, result);
+
+        /*TempleMessageHelper.importTempleMessage(phone, timeMessage);*/
+    }
+
+    private void startAnalyze(Context context, String name, String phone, String message, long time, TypeMessage type, ResultReturnModel[] results) {
+        Log.d(TAG, "Message received: " + "from: " + phone + " body: " + message + " time: " + time);
+
+        LoaderSQLite.startAnalyzing(context, name, phone, message, time, type.name(), results);
+    }
+
+    private void importKetqua(final Context context, String address, String body, long time) {
+        try {
+            lsLotoMessage = new ArrayList<>();
+
+            Date dateMsg = new Date(time);
+            Format formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US);
+            LotoMessage mLotoMessage = new LotoMessage();
+            mLotoMessage.Address = address;
+            mLotoMessage.Body = body;
+            mLotoMessage.SentDate = dateMsg;
+
+            if (body == null)
+            {
+                return;
+            }
+
+            lsLotoMessage.add(mLotoMessage);
+
+
+            if (lsLotoMessage.size() > 0) {
+                // Add a new record to Database.
+                new CommonTask.ThreadTask(new Runnable() {
+                    @Override
+                    public void run() {
+                        String mBody = lsLotoMessage.get(0).Body;
+
+                        String bodySeparated = ResultModel.buildFrom(mBody);
+
+                        if (TextUtils.isEmpty(bodySeparated))
+                        {
+                            mBody = ""; //Remove when not enough prize.
+                        }
+
+                        String date = ResultModel.getDateFrom(mBody);
+
+                        if (date == null)
+                        {
+                            return;
+                        }
+
+                        ContentValues values = new ContentValues();
+
+                        values.put(LotoMsgProvider.Address, lsLotoMessage.get(0).Address);
+                        values.put(LotoMsgProvider.Date, date);
+                        values.put(LotoMsgProvider.Body, mBody);
+                        values.put(LotoMsgProvider.Body_Separated, bodySeparated);
+
+                        ContentResolver resolver = context.getContentResolver();
+
+                        //IF it's new year, update old db.
+                        if (isYearTrans(date, lsLotoMessage.get(0).SentDate))
+                        {
+                            int row = resolver.update(
+                                    LoaderSQLite.getUriForQueryLoto(String.valueOf(Calendar.getInstance().get(Calendar.YEAR) - 1)),
+                                    values,
+                                    LotoMsgProvider.Date + "=?",
+                                    new String[]{date});
+
+                            Log.d("MessageReceiver", "Import Result: " + "updated in row: " + row + ", case YearTrans = true");
+                            return;
+                        }
+
+                        Cursor c = resolver.query(LotoMsgProvider.CONTENT_URI, null,LotoMsgProvider.Date + "=?", new String[]{date}, null);
+
+                        try {
+                            if (c == null || c.getCount() == 0)
+                            {
+                                // Insert DB.
+                                Uri uri = resolver.insert(
+                                        LotoMsgProvider.CONTENT_URI, values);
+
+                                Log.d(TAG, "Import Result: " + uri);
+                            }
+                            else
+                            {
+                                //Update DB If exist.
+                                int row = resolver.update(
+                                        LotoMsgProvider.CONTENT_URI, values, LotoMsgProvider.Date + "=?", new String[]{date});
+
+                                Log.d(TAG, "Import Result: " + "updated in row: " + row + ", case YearTrans = false");
+                            }
+                        } finally {
+                            if (c != null)
+                            {
+                                c.close();
+                            }
+                        }
+                    }
+                }).start();
+
+            }
+
+        } catch (Exception ex) {
+            if (BuildConfig.DEBUG)
+            {
+                Log.e(TAG, ex.getMessage());
+            }
+        }
+    }
+
+    private boolean isYearTrans(String dateResult, Date dateMessage) {
+        String[] date = dateResult.trim().split("/");
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(dateMessage);
+
+        return date[0] == "31" && date[1] == "12" && calendar.get(Calendar.DAY_OF_MONTH) == 1 && calendar.get(Calendar.MONTH) == 0;
+    }
+}

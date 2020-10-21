@@ -1,0 +1,68 @@
+Index: app/src/main/java/bingo/com/helperdb/TempleMessageHelper.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/java/bingo/com/helperdb/TempleMessageHelper.java	(revision 138)
++++ app/src/main/java/bingo/com/helperdb/TempleMessageHelper.java	(revision )
+@@ -6,7 +6,7 @@
+ import android.util.Log;
+ 
+ import com.bingo.analyze.Analyze;
+-import com.bingo.analyze.AnalyzeSMS;
++import com.bingo.analyze.AnalyzeSMSNew;
+ 
+ import java.util.ArrayList;
+ 
+@@ -57,7 +57,7 @@
+ 
+             while (!cursor.isAfterLast())
+             {
+-                AnalyzeSMS analyzeSMS = new AnalyzeSMS();
++                AnalyzeSMSNew analyzeSMS = new AnalyzeSMSNew();
+                 ArrayList<Analyze> listPoint = analyzeSMS.bingoAnalyze(cursor.getString(cursor.getColumnIndex(TempleMsgDatabase.CONTENT)), "", "");
+ 
+                 String error = null;
+Index: app/src/main/java/bingo/com/utils/StatisticControlImport.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/java/bingo/com/utils/StatisticControlImport.java	(revision 138)
++++ app/src/main/java/bingo/com/utils/StatisticControlImport.java	(revision )
+@@ -6,7 +6,7 @@
+ import android.util.Log;
+ 
+ import com.bingo.analyze.Analyze;
+-import com.bingo.analyze.AnalyzeSMS;
++import com.bingo.analyze.AnalyzeSMSNew;
+ import com.bingo.analyze.NumberAndUnit;
+ import com.bingo.analyze.calculation.BingoCalc;
+ 
+@@ -304,7 +304,7 @@
+ 
+         HashMap<Integer, Double> percentMaps = ContactDBHelper.getHesoGiu(phone);
+ 
+-        AnalyzeSMS analyzeSMS = new AnalyzeSMS();
++        AnalyzeSMSNew analyzeSMS = new AnalyzeSMSNew();
+ 
+         if (todayResult != null)
+         {
+@@ -764,7 +764,7 @@
+         if (model.getConfig() != null)
+             setConfigForUser(model.getConfig());
+ 
+-        AnalyzeSMS analyzeSMS = new AnalyzeSMS();
++        AnalyzeSMSNew analyzeSMS = new AnalyzeSMSNew();
+ 
+         ArrayList<Analyze> listPoint = analyzeSMS.bingoAnalyze(message, result[0].getBody(), result[1].getBody());
+ 
+@@ -858,7 +858,7 @@
+ 
+         /*setConfigForUser(model.getConfig());*/
+ 
+-        AnalyzeSMS analyzeSMS = new AnalyzeSMS();
++        AnalyzeSMSNew analyzeSMS = new AnalyzeSMSNew();
+ 
+         ArrayList<Analyze> listPoint = analyzeSMS.bingoAnalyze(message, result[0].getBody(), result[1].getBody());
+ 

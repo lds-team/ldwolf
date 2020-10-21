@@ -1,0 +1,444 @@
+package com.bingo.analyze;
+
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import com.bingo.analyze.calculation.BingoCalc;
+import com.bingo.analyze.calculation.KetQua;
+import com.bingo.common.utils.ArrayUtils;
+import com.bingo.common.utils.ValidateSyntax;
+
+public class AnalyzeSMSNew {
+
+	public ArrayList<Analyze> bingoAnalyze(String smsContent, String todayBingoResult, String yesterdayBingoResult) {
+
+		Analyze objAnalyze = new Analyze();
+		ArrayList<Analyze> arrAnalyze = new ArrayList<>();
+
+		AnalyzeSMSNew analyze = new AnalyzeSMSNew();
+
+		int countXien = 0;
+		Analyze _analyze = analyze.validateMessage(smsContent);
+		if (_analyze != null && _analyze.error) {
+			arrAnalyze.add(_analyze);
+			return arrAnalyze;
+		}
+
+		ArrayList<NumberAndUnit> _syntaxs = analyze.analyzeMessage(smsContent, todayBingoResult, yesterdayBingoResult);
+		BigDecimal thucThu = BigDecimal.ONE;
+
+		ArrayList<String> allNumbers = new ArrayList<>();
+		double HE_SO = 0;
+		double HE_SO_THANG = 0;
+		int amountPoint = 0;
+		String ketQua = todayBingoResult;
+		String sDB = "";
+		if (!ketQua.equals("")) {
+			// Lấy tất cả kết quả xổ số
+
+			KetQua db = BingoCalc.initial().extractResultSMS("DB", ketQua);
+			KetQua giai1 = BingoCalc.initial().extractResultSMS("1", ketQua);
+			KetQua giai2 = BingoCalc.initial().extractResultSMS("2", ketQua);
+			KetQua giai3 = BingoCalc.initial().extractResultSMS("3", ketQua);
+			KetQua giai4 = BingoCalc.initial().extractResultSMS("4", ketQua);
+			KetQua giai5 = BingoCalc.initial().extractResultSMS("5", ketQua);
+			KetQua giai6 = BingoCalc.initial().extractResultSMS("6", ketQua);
+			KetQua giai7 = BingoCalc.initial().extractResultSMS("7", ketQua);
+
+			sDB = db.daySo.get(0);
+			allNumbers.add(sDB.substring(sDB.length() - 2));
+
+			for (String so : giai1.daySo) {
+				allNumbers.add(so.substring(so.length() - 2));
+			}
+
+			for (String so : giai2.daySo) {
+				allNumbers.add(so.substring(so.length() - 2));
+			}
+
+			for (String so : giai3.daySo) {
+				allNumbers.add(so.substring(so.length() - 2));
+			}
+
+			for (String so : giai4.daySo) {
+				allNumbers.add(so.substring(so.length() - 2));
+			}
+
+			for (String so : giai5.daySo) {
+				allNumbers.add(so.substring(so.length() - 2));
+			}
+
+			for (String so : giai6.daySo) {
+				allNumbers.add(so.substring(so.length() - 2));
+			}
+
+			for (String so : giai7.daySo) {
+				allNumbers.add(so.substring(so.length() - 2));
+			}
+		}
+		if (_syntaxs == null) {
+			objAnalyze.error = true;
+			objAnalyze.errorMessage = "Không thể nhận diện được cú pháp này";
+			arrAnalyze.add(objAnalyze);
+			return arrAnalyze;
+		}
+		for (NumberAndUnit _numberAndUnit : _syntaxs) {
+
+			thucThu = BigDecimal.ZERO;
+			amountPoint = 0;
+
+			objAnalyze = new Analyze();
+			objAnalyze.numberAndUnit = _numberAndUnit;
+
+			// Calculate:
+			String extractType = "";
+			for (String number : _numberAndUnit.Numbers) {
+				if (!number.trim().equals("")) {
+					// Số ti�?n thu của khách
+
+					if (_numberAndUnit.Type.indexOf("de") >= 0) {
+						HE_SO = BingoCalc.HS_DE;
+						extractType = "DB";
+					} else {
+						HE_SO = BingoCalc.HS_NONE;
+						extractType = "ALL";
+					}
+
+				}
+
+				if (!ketQua.equals("")) {
+
+					if (extractType.equals("DB")) {
+						BigDecimal result = BingoCalc.initial().calc(Integer.parseInt(_numberAndUnit.Price), HE_SO);
+						thucThu = thucThu.add(result);
+						objAnalyze.actuallyCollected = thucThu;
+
+						amountPoint += Integer.parseInt(_numberAndUnit.Price);
+
+						int count = number.length() - number.replace("-", "").length();
+						String[] arrNums = number.split("-");
+						if (count == 0) {
+							if (sDB.substring(sDB.length() - 2).equals(number.trim())) {
+								BigDecimal resultThangDe = BingoCalc.initial()
+										.calc(Integer.parseInt(_numberAndUnit.Price), BingoCalc.HS_THANG_DE);
+								objAnalyze.guestWin = resultThangDe;
+								objAnalyze.winNumber = number.trim();
+								objAnalyze.winSyntax = objAnalyze.winNumber + "x" + _numberAndUnit.Price + ""
+										+ _numberAndUnit.Unit;
+							}
+						} else {
+							for (String num : arrNums) {
+								if (sDB.substring(sDB.length() - 2).equals(num.trim())) {
+									BigDecimal resultThangDe = BingoCalc.initial()
+											.calc(Integer.parseInt(_numberAndUnit.Price), BingoCalc.HS_THANG_DE);
+									objAnalyze.guestWin = resultThangDe;
+									objAnalyze.winNumber = num.trim();
+									objAnalyze.winSyntax = objAnalyze.winNumber + "x" + _numberAndUnit.Price + ""
+											+ _numberAndUnit.Unit;
+								}
+							}
+						}
+
+					} else {
+
+						// Xác định loại và lấy cặp số
+						if (_numberAndUnit.Type.equals("lo")) {
+
+							for (String _num : number.split("-")) {
+								// Tính thực thu Lô
+								BigDecimal resLo = BingoCalc.initial().calc(Integer.parseInt(_numberAndUnit.Price),
+										HE_SO);
+								thucThu = thucThu.add(resLo);
+								objAnalyze.actuallyCollected = thucThu;
+								amountPoint += Integer.parseInt(_numberAndUnit.Price);
+
+								for (String kq : allNumbers) {
+
+									if (_num.equals(kq)) {
+
+										// Trúng lô
+										BigDecimal resultThangLo = BingoCalc.initial()
+												.calc(Integer.parseInt(_numberAndUnit.Price), BingoCalc.HS_THANG_LO);
+										objAnalyze.guestWin = resultThangLo;
+										objAnalyze.winNumber = objAnalyze.winNumber == null ? _num.trim()
+												: objAnalyze.winNumber + "-" + _num.trim();
+										objAnalyze.winSyntax = objAnalyze.winNumber + "x" + _numberAndUnit.Price + ""
+												+ _numberAndUnit.Unit;
+									}
+								}
+							}
+
+						} else {
+							if (number.indexOf("-") > 0) {
+								int count = number.length() - number.replace("-", "").length();
+
+								switch (count) {
+								case 1:
+									// xien2
+									HE_SO = BingoCalc.HS_XIEN_2;
+									HE_SO_THANG = BingoCalc.HS_THANG_XIEN_2;
+									break;
+								case 2:
+									// xien3
+									HE_SO = BingoCalc.HS_XIEN_3;
+									HE_SO_THANG = BingoCalc.HS_THANG_XIEN_3;
+									break;
+								case 3:
+									// xien4
+									HE_SO = BingoCalc.HS_XIEN_4;
+									HE_SO_THANG = BingoCalc.HS_THANG_XIEN_4;
+									break;
+								}
+
+								// Tính thực thu
+								BigDecimal resXien = BingoCalc.initial().calc(Integer.parseInt(_numberAndUnit.Price),
+										HE_SO);
+								thucThu = thucThu.add(resXien);
+								amountPoint += Integer.parseInt(_numberAndUnit.Price);
+								countXien = 0;
+								String[] arrNums = number.split("-");
+								for (String xien : arrNums) {
+
+									objAnalyze.actuallyCollected = thucThu;
+
+									for (String kq : allNumbers) {
+										if (xien.equals(kq)) {
+											countXien++;
+
+										}
+									}
+								}
+
+								if (countXien >= arrNums.length) {
+									// Trúng xien
+									BigDecimal resultThangLo = BingoCalc.initial()
+											.calc(Integer.parseInt(_numberAndUnit.Price), HE_SO_THANG);
+									objAnalyze.winSyntax = objAnalyze.winNumber + "x" + _numberAndUnit.Price + ""
+											+ _numberAndUnit.Unit;
+									objAnalyze.guestWin = resultThangLo;
+									objAnalyze.winNumber = number.trim();
+
+								}
+
+								countXien = 0;
+							} else {
+
+							}
+						}
+					}
+
+				}
+			}
+
+			objAnalyze.amountPoint = amountPoint;
+			objAnalyze.winType = _numberAndUnit.Type;
+			arrAnalyze.add(objAnalyze);
+		}
+
+		return arrAnalyze;
+	}
+
+	public ArrayList<NumberAndUnit> analyzeMessage(String smsContent, String todayBingoResult,
+			String yesterdayBingoResult) {
+		ArrayList<ExtractObject> extractObjectArray = new ArrayList<>();
+
+		// Format content
+		String content = formatContent(smsContent);
+		String[] contentArray = content.split("\n");
+
+		for (String syntax : contentArray) {
+			syntax = syntax.trim();
+			extractObjectArray.addAll(ExtracDe.analyze(syntax));
+			extractObjectArray.addAll(ExtracLo.analyze(syntax));
+		}
+
+		ArrayList<NumberAndUnit> _syntaxs = new ArrayList<>();
+		ArrayList<String> removeArray = new ArrayList<>();
+		NumberAndUnit _numberAndUnit = null;
+		for (ExtractObject extractObject : extractObjectArray) {
+			removeArray.clear();
+			_numberAndUnit = new NumberAndUnit();
+			for (RemoveObject removeObject : extractObject.RemoveNumbers) {
+				removeArray.add(removeObject.Number);
+			}
+			_numberAndUnit.Numbers = reformatNumbers(extractObject.Numbers, removeArray);
+			_numberAndUnit.OrgNumber = extractObject.Type;
+			_numberAndUnit.Price = extractObject.Money;
+			_numberAndUnit.syntax = extractObject.Syntax;
+			_numberAndUnit.Type = extractObject.Type;
+			_numberAndUnit.Unit = extractObject.Unit;
+			_syntaxs.add(_numberAndUnit);
+		}
+
+		return _syntaxs;
+	}
+
+	public Analyze validateMessage(String smsContent) {
+		Analyze objAnalyze = new Analyze();
+
+		// Format content
+		String content = formatContent(smsContent);
+		String[] contentArray = content.split("\n");
+
+		for (String syntax : contentArray) {
+			syntax = syntax.trim();
+			// Validate
+			ResultObject resultObject = ValidateSyntax.validate(syntax);
+			if (resultObject.Error) {
+				// Error
+				objAnalyze.error = resultObject.Error;
+				objAnalyze.errorMessage = resultObject.MsgError;
+				return objAnalyze;
+			}
+		}
+		return null;
+	}
+
+	protected ArrayList<String> reformatNumbers(ArrayList<String> numbers, ArrayList<String> removeRumbers) {
+		ArrayList<String> refNumbers = new ArrayList<>();
+		for (String number : numbers) {
+			if (number.trim().length() == 3) {
+				String num1 = number.trim().substring(0, 2);
+				if (ArrayUtils.indexOf(removeRumbers.toArray(new String[removeRumbers.size()]), num1) >= 0) {
+				} else {
+					refNumbers.add(num1);
+				}
+
+				String num2 = number.trim().substring(1, number.trim().length());
+				if (ArrayUtils.indexOf(removeRumbers.toArray(new String[removeRumbers.size()]), num2) >= 0) {
+				} else {
+					refNumbers.add(num2);
+				}
+			} else {
+				if (ArrayUtils.indexOf(removeRumbers.toArray(new String[removeRumbers.size()]), number.trim()) >= 0) {
+				} else {
+					refNumbers.add(number.trim());
+				}
+			}
+		}
+
+		return refNumbers;
+	}
+
+	protected String formatContent(String content) {
+
+		String newContent = "";
+
+		content = content.toLowerCase();
+
+		content = content.replaceAll("ộ", "oj");
+		content = content.replaceAll("ỏ", "or");
+		// content = content.replaceAll("\\.|\\-|\\_|\\,|\\;|:|\\!", " ");
+		content = content.replaceAll("([0-9]+)(\\-|\\_|\\;|:|\\!)([0-9]{2})", "$1,$3");
+		content = content.replaceAll("([0-9]+)(\\s*)\\*(\\s*)([0-9]+)([kd]{1})", "$1x$4$5");
+		content = content.replaceAll("\\*", " ");
+		content = content.replaceAll("×", "x");
+		content = content.replaceAll("(x\\s*[0-9]+)\\s*(k|d|n|tr|nghin|trieu)(\\s*,)", "$1$2");
+		content = content.replaceAll("₫", "d");
+
+		newContent = VNCharacterUtils.removeAccent(content).toLowerCase();
+		newContent = newContent.replaceAll("([qwrtpsdghklxcvbnm]+)0", "$1o");
+		newContent = newContent.replaceAll("([0-9]+)(\\s+)n", "$1k");
+		newContent = newContent.replaceAll("x([0-9]+)(\\s*)n", "x$1k");
+		newContent = newContent.replaceAll("x([0-9]+)(\\s*)k", "x$1k");
+		newContent = newContent.replaceAll("([0-9]+)(\\s+)([0-9]+)k", "$1x$3k");
+		newContent = newContent.replaceAll("([0-9]+)(\\s+)([0-9]+)n", "$1x$3k");
+		newContent = newContent.replaceAll("([0-9]+)(\\s+)([0-9]+)d", "$1x$3d");
+
+		newContent = newContent.replaceAll("\\s+", " ");
+		newContent = newContent.replaceAll("moi[\\s]*con", "x");
+		newContent = newContent.replaceAll("\\s*diem", "d");
+		newContent = newContent.replaceAll("[\\s]*x[\\s]*", "x");
+		newContent = newContent.replaceAll("[\\s]*i[\\s]*o[\\s]*([0-9]+)", "lo $1");
+		newContent = newContent.replaceAll("[\\s]*i[\\s]*0[\\s]*([0-9]+)", "lo $1");
+		newContent = newContent.replaceAll("xien[\\s]*ghep[\\s]*2", "xien ghep 2");
+
+		newContent = newContent.replaceAll("(boj)(\\s*)([0-9]+)(\\s*)(boj)(\\s*)([0-9]+)", "$1 $3 $7");
+
+		newContent = newContent.replaceAll("[\\(][a-z0-9\\s]+[\\)‌​]", "");
+
+		if (newContent.replaceAll(" ", "").indexOf("debor") >= 0) {
+			newContent = newContent.replaceAll("de[\\s]+bor", "de 100 so bor");
+		}
+
+		newContent = newContent.replaceAll("de[\\s]*bo[\\s]*([0-9]+)", "\nde boj $1");
+
+		// Format to righ syntax
+		newContent = newContent.replaceAll("de[\\s]*", "\nde ");
+		newContent = newContent.replaceAll("lo[\\s]*", "\nlo ");
+		newContent = newContent.replaceAll("xien[\\s]*", "\nxien ");
+
+		ArrayList<String> syntaxs = new ArrayList<String>(Arrays.asList(newContent.split("\n")));
+
+		ArrayList<String> newSyntaxs = new ArrayList<String>();
+
+		for (String line : syntaxs) {
+			if (line.trim().equals(""))
+				continue;
+
+			// line = line.replaceAll("[0-9]+[\\s]+", "lo $1");
+
+			boolean needForMatUnit = line.replaceAll(" ", "").matches(".*[0-9]+(trieu)[0-9]+.*");
+			boolean needForMatUnit2 = line.replaceAll(" ", "").matches(".*[0-9]+(trieu)(?![0-9]+).*");
+
+			if (needForMatUnit) {
+				line = line.replaceAll("trieu", "");
+			} else if (needForMatUnit2) {
+				line = line.replaceAll("trieu", "000k");
+			}
+
+			String newLine = "";
+			if (isSyntax(line, "de")) {
+				newLine = rebuildSyntax(line, "de");
+			} else if (isSyntax(line, "lo")) {
+				newLine = rebuildSyntax(line, "lo");
+			} else if (isSyntax(line, "xien")) {
+				newLine = rebuildSyntax(line, "xien");
+			}
+
+			newLine = newLine.replaceAll("o([0-9])", "0$1");
+			newLine = newLine.replaceAll("([0-9])o", "$10");
+
+			newSyntaxs.add(newLine);
+
+		}
+
+		return ArrayUtils.join(newSyntaxs.toArray(new String[newSyntaxs.size()]), "\n");
+	}
+
+	protected boolean isSyntax(String line, String type) {
+		line = line.trim();
+		if (line.indexOf(type) >= 0) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	protected String rebuildSyntax(String line, String type) {
+
+		String newLine = line;
+
+		String[] tokens = line.trim().split("x\\s*[0-9]+\\s*k|x\\s*[0-9]+\\s*d");
+
+		for (String token : tokens) {
+			String _token = token.trim();
+			if (_token.equals(""))
+				continue;
+
+			if (_token.indexOf(type) >= 0) {
+			} else {
+
+				newLine = newLine.replaceAll(_token + "(x[0-9\\s]+k|x[0-9\\s]+d)",
+						"\n" + type + " " + _token.replace("\n", "") + "$1");
+
+			}
+		}
+
+		return newLine;
+	}
+
+}

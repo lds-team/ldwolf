@@ -1,0 +1,104 @@
+package bingo.com.dialog;
+
+import android.content.Context;
+import android.view.View;
+import android.widget.EditText;
+import android.widget.Toast;
+
+import bingo.com.R;
+import bingo.com.base.baseview.BaseDialog;
+import bingo.com.callbacks.UpdateSync;
+import bingo.com.helperdb.MessageDBHelper;
+import bingo.com.model.ChooseMessage;
+import bingo.com.model.ResultReturnModel;
+import bingo.com.utils.LoaderSQLite;
+import bingo.com.utils.StatisticControlImport;
+import butterknife.Bind;
+import butterknife.OnClick;
+
+/**
+ * Created by kazinguyen on 6/23/17.
+ */
+public class EditMessageDialog extends BaseDialog implements View.OnClickListener {
+
+    @Bind(R.id.dialog_em_editext)
+    EditText editText;
+
+    private String name;
+
+    private String phone;
+
+    private String time;
+
+    private String type;
+
+    private Context context;
+
+    private UpdateSync listener;
+
+    public EditMessageDialog(Context context, boolean notCancel) {
+        super(context, notCancel);
+
+        this.context = context;
+    }
+
+    @Override
+    public int layout() {
+        return R.layout.dialog_editmessage;
+    }
+
+    @Override
+    public void dismissed() {
+        if (listener != null)
+            listener.onUpdate();
+    }
+
+    public void setData(ChooseMessage message) {
+        editText.setText(message.getRawContent());
+
+        this.name = message.getName();
+        this.phone = message.getPhone();
+        this.time = message.getTime();
+        this.type = message.getType();
+    }
+
+    @OnClick({R.id.dialog_em_edit, R.id.dialog_em_delete})
+    @Override
+    public void onClick(View v) {
+        loadingAnim();
+
+        switch (v.getId())
+        {
+            case R.id.dialog_em_edit:
+                ResultReturnModel[] results = StatisticControlImport.getResultTodayAndYesterday(context.getApplicationContext());
+
+                int row = MessageDBHelper.updateMessageAndReload(name, phone, time, editText.getText().toString(), results);
+
+                if (row != 0)
+                {
+                    LoaderSQLite.startForceAnalyzing(context, name, phone, editText.getText().toString(), (Long.parseLong(time) + 1), type, results);
+
+                    Toast.makeText(context, "Đã update tin nhắn thành công.", Toast.LENGTH_LONG).show();
+                }
+                else
+                {
+                    Toast.makeText(context, "Xảy ra lỗi khi update tin nhắn.", Toast.LENGTH_LONG).show();
+                }
+                break;
+
+            case R.id.dialog_em_delete:
+                ResultReturnModel[] result = StatisticControlImport.getResultTodayAndYesterday(context);
+                MessageDBHelper.deleteMessageAndReload(name, phone, time, result);
+                break;
+
+            default:break;
+        }
+
+        dismissAnim();
+        dismiss();
+    }
+
+    public void setOnUpdateOnDismissListner(UpdateSync listner) {
+        this.listener = listner;
+    }
+}

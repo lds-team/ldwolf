@@ -1,0 +1,46 @@
+package bingo.com.screen.modelscreen;
+
+import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+
+import bingo.com.base.BaseFragment;
+
+/**
+ * Created by kazinguyen on 6/25/17.
+ */
+public class ModelFragment extends BaseFragment<ModelFragment> {
+
+    public static final String TAG = "ModelFragment";
+
+    @Override
+    public String initTag() {
+        return TAG;
+    }
+
+    @Override
+    public String screenNane() {
+        return "Tin Mẫu";
+    }
+
+    @Override
+    public View onCreateFragmentView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        return null;
+    }
+
+    @Override
+    public void onViewFragmentCreated(View view, Bundle savedInstanceState) {
+
+    }
+
+    @Override
+    public ModelFragment instance() {
+        return this;
+    }
+
+    @Override
+    public void update() {
+
+    }
+}

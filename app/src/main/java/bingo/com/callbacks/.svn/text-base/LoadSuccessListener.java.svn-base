@@ -1,0 +1,12 @@
+package bingo.com.callbacks;
+
+import java.util.Map;
+
+/**
+ * Created by kazinguyen on 3/27/17.
+ */
+public interface LoadSuccessListener {
+
+    void onReceiveResult(String body, Map<String, String[]> result);
+
+}

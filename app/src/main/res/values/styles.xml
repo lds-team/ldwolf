@@ -1,0 +1,32 @@
+<resources xmlns:tools="http://schemas.android.com/tools"
+    tools:shrinkMode="strict">
+
+    <!-- Base application theme. -->
+    <style name="Theme.AppCompat.Light.NoActionBar.CustomDesign" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/colorAccent</item>
+        <item name="android:windowBackground">@color/window_background</item>
+    </style>
+
+    <style name="ActionBarTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+        <item name="actionMenuTextColor">@android:color/primary_text_dark</item>
+    </style>
+
+    <style name="DialogChooser" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="android:textColor">@android:color/background_dark</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:background">@color/white_pure</item>
+    </style>
+
+    <style name="TextStyleCustomerTable" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="android:textColor">@android:color/background_dark</item>
+        <item name="android:textSize">12sp</item>
+        <item name="android:padding">2dp</item>
+    </style>
+
+    <style name="menu_labels_style">
+        <item name="android:background">@drawable/fab_label_background</item>
+        <item name="android:textColor">@android:color/white</item>
+    </style>
+</resources>

@@ -1,0 +1,486 @@
+package bingo.com.async;
+
+import android.app.ProgressDialog;
+import android.content.ContentResolver;
+import android.content.ContentValues;
+import android.content.Context;
+import android.content.Intent;
+import android.database.Cursor;
+import android.net.Uri;
+import android.os.AsyncTask;
+import android.text.TextUtils;
+import android.util.Log;
+
+import java.lang.ref.WeakReference;
+import java.text.Format;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
+import java.util.Locale;
+
+import bingo.com.BuildConfig;
+import bingo.com.enumtype.LotoType;
+import bingo.com.enumtype.TypeMessage;
+import bingo.com.helperdb.CongnoDBHelper;
+import bingo.com.helperdb.ContactDBHelper;
+import bingo.com.helperdb.FollowDBHelper;
+import bingo.com.helperdb.MessageDBHelper;
+import bingo.com.helperdb.SMSHelper;
+import bingo.com.helperdb.db.FollowDatabase;
+import bingo.com.helperdb.db.LotoMsgProvider;
+import bingo.com.model.CongnoModel;
+import bingo.com.model.LotoMessage;
+import bingo.com.model.ResultModel;
+import bingo.com.model.ResultReturnModel;
+import bingo.com.screen.numberreport.ManagerNumberFragment;
+import bingo.com.utils.Action;
+import bingo.com.utils.CalculateResult;
+import bingo.com.utils.LoaderSQLite;
+import bingo.com.utils.StatisticControlImport;
+import bingo.com.utils.Utils;
+
+/**
+ * Created by KaziNguyen on 26/06/2017.
+ */
+public class TaskHelper {
+
+    public static class TaskSync extends AsyncTask<String, String, String> {
+
+        WeakReference<ManagerNumberFragment> pContext;
+
+        ProgressDialog dialog;
+
+        ResultReturnModel[] result;
+
+        public TaskSync(ManagerNumberFragment context) {
+            pContext = new WeakReference<ManagerNumberFragment>(context);
+        }
+
+        @Override
+        protected void onPreExecute() {
+            dialog = new ProgressDialog(pContext.get().getActivity());
+            dialog.setMessage("Calculating...50%");
+            dialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+            dialog.setCancelable(true);
+            dialog.show();
+
+            result = StatisticControlImport.getResultTodayAndYesterday(pContext.get().getActivity().getApplicationContext());
+        }
+
+        @Override
+        protected String doInBackground(String... params) {
+
+            return /*FollowDBHelper.syncDatabase(pContext.get().getActivity().getApplicationContext(), result)*/ null;
+        }
+
+        @Override
+        protected void onPostExecute(String result) {
+            Log.d("TaskHelper", "TaskSync: isCancelled: " + this.isCancelled() + " ,Status: " + this.getStatus());
+
+            dialog.dismiss();
+
+            dialog = null;
+
+            pContext.clear();
+        }
+    }
+
+    public static class TaskLoadResult extends AsyncTask<String, String, String> {
+
+        public static final String TAG = "TaskLoadResult";
+
+        private Context context;
+
+        public TaskLoadResult(Context context) {
+            this.context = context;
+        }
+
+        @Override
+        protected String doInBackground(String... params) {
+
+            Calendar calendar = Calendar.getInstance();
+
+            calendar.set(Calendar.HOUR_OF_DAY, 23);
+            calendar.set(Calendar.MINUTE, 59);
+            calendar.set(Calendar.SECOND, 59);
+
+            String endDate = String.valueOf(calendar.getTimeInMillis());
+
+            calendar.set(Calendar.HOUR_OF_DAY, 0);
+            calendar.set(Calendar.MINUTE, 0);
+            calendar.set(Calendar.SECOND, 0);
+
+            String startDate = String.valueOf(calendar.getTimeInMillis());
+
+            String[] reqCols = new String[] { "_id", "thread_id", "address", "body", "date", "person" };
+            Cursor c = this.context.getContentResolver().query(SMSHelper.RECEIVED_MESSAGE_CONTENT_PROVIDER, reqCols, "date >=? AND date <=? AND (address =? OR address =?)" , new String[]{startDate, endDate, "997", "8085"}, null);
+
+            if (c != null && c.getCount() > 0)
+            {
+                c.moveToFirst();
+
+                String address = c.getString(c.getColumnIndex("address"));
+
+                String body = c.getString(c.getColumnIndex("body"));
+
+                String time = c.getString(c.getColumnIndex("date"));
+
+                importKetqua(context, address, body, Long.parseLong(time));
+            }
+
+            if (c != null)
+                c.close();
+
+            //TODO dummy--------
+            /*String body = "MB 11/08\n" +
+                    "DB:80732\n" +
+                    "1:33477\n" +
+                    "2:33204-14447\n" +
+                    "3:92836-64418-68126-38256-25174-13930\n" +
+                    "4:2131-9054-9480-1720\n" +
+                    "5:5056-3649-1835-9111-4393-2944\n" +
+                    "6:118-043-158\n" +
+                    "7:07-04-44-42";
+
+            importKetqua(context, "997", body, Calendar.getInstance().getTimeInMillis());*/
+            //-------------
+
+            return  null;
+        }
+
+        private void importKetqua(final Context context, String address, String body, long time) {
+            try {
+                List<LotoMessage> lsLotoMessage = new ArrayList<>();
+
+                Date dateMsg = new Date(time);
+                Format formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US);
+                LotoMessage mLotoMessage = new LotoMessage();
+                mLotoMessage.Address = address;
+                mLotoMessage.Body = body;
+                mLotoMessage.SentDate = dateMsg;
+
+                if (body == null)
+                {
+                    return;
+                }
+
+                lsLotoMessage.add(mLotoMessage);
+
+
+                if (lsLotoMessage.size() > 0) {
+                    String mBody = lsLotoMessage.get(0).Body;
+                    String bodySeparated = ResultModel.buildFrom(mBody);
+
+                    if (TextUtils.isEmpty(bodySeparated))
+                    {
+                        mBody = ""; //Remove when not enough prize.
+                    }
+
+                    String date = ResultModel.getDateFrom(mBody);
+
+                    if (date == null) {
+                        return;
+                    }
+
+                    ContentValues values = new ContentValues();
+
+                    values.put(LotoMsgProvider.Address, lsLotoMessage.get(0).Address);
+                    values.put(LotoMsgProvider.Date, date);
+                    values.put(LotoMsgProvider.Body, mBody);
+                    values.put(LotoMsgProvider.Body_Separated, bodySeparated);
+
+                    ContentResolver resolver = context.getContentResolver();
+
+                    //IF it's new year, update old db.
+                    if (isYearTrans(date, lsLotoMessage.get(0).SentDate)) {
+                        int row = resolver.update(
+                                LoaderSQLite.getUriForQueryLoto(String.valueOf(Calendar.getInstance().get(Calendar.YEAR) - 1)),
+                                values,
+                                LotoMsgProvider.Date + "=?",
+                                new String[]{date});
+
+                        Log.d(TAG, "Import Result: " + "updated in row: " + row + ", case YearTrans = true");
+                        return;
+                    }
+
+                    Cursor c = resolver.query(LotoMsgProvider.CONTENT_URI, null, LotoMsgProvider.Date + "=?", new String[]{date}, null);
+
+                    try {
+                        if (c == null || c.getCount() == 0) {
+                            // Insert DB.
+                            Uri uri = resolver.insert(
+                                    LotoMsgProvider.CONTENT_URI, values);
+
+                            Log.d(TAG, "Import Result: " + uri);
+                        } else {
+                            //Update DB If exist.
+                            int row = resolver.update(
+                                    LotoMsgProvider.CONTENT_URI, values, LotoMsgProvider.Date + "=?", new String[]{date});
+
+                            Log.d(TAG, "Import Result: " + "updated in row: " + row + ", case YearTrans = false");
+                        }
+                    } finally {
+                        if (c != null) {
+                            c.close();
+                        }
+                    }
+
+                }
+
+            } catch (Exception ex) {
+                if (BuildConfig.DEBUG)
+                {
+                    Log.e(TAG, ex.getMessage());
+                }
+            }
+        }
+
+        private boolean isYearTrans(String dateResult, Date dateMessage) {
+            String[] date = dateResult.trim().split("/");
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTime(dateMessage);
+
+            return date[0] == "31" && date[1] == "12" && calendar.get(Calendar.DAY_OF_MONTH) == 1 && calendar.get(Calendar.MONTH) == 0;
+        }
+    }
+
+    public static class TaskLoadResultToDB extends AsyncTask<String, Integer, String> {
+
+        Context context;
+
+        ResultReturnModel[] result;
+
+        CalculateResult calculateResult;
+
+        ProgressDialog progressDialog;
+
+        Cursor cursor;
+
+        String phone;
+
+        public TaskLoadResultToDB(Context context, String phone) {
+            this.context = context;
+
+            this.phone = phone;
+        }
+
+        @Override
+        protected void onPreExecute() {
+
+            if (phone == null)
+            {
+                cursor = FollowDBHelper.getAllNumberSortByPhone();
+            }
+            else
+            {
+                cursor = FollowDBHelper.getAllNumberSortByPhone(phone);
+            }
+
+            int max = cursor.getCount();
+
+            progressDialog = new ProgressDialog(context);
+            /*progressDialog.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);*/
+            progressDialog.setCancelable(false);
+            progressDialog.setIndeterminate(false);
+            progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+            progressDialog.setMax(max);
+            progressDialog.show();
+
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTimeInMillis(Utils.getLongTimeWithCurrentConfigDate());
+
+            result = StatisticControlImport.getResultWithDay(context, calendar);
+            calculateResult = new CalculateResult(result[0].getBody());
+
+            calendar.clear();
+        }
+
+        @Override
+        protected String doInBackground(String... params) {
+
+            doInCursor(cursor);
+
+            return null;
+        }
+
+        private void doInCursor(Cursor cursor) {
+            if (!cursor.moveToFirst())
+            {
+                if (progressDialog.isShowing())
+                {
+                    progressDialog.dismiss();
+                }
+                return;
+            }
+
+            String oldPhone = cursor.getString(cursor.getColumnIndex(FollowDatabase.DETAIL_PHONE));
+
+            String oldTime = cursor.getString(cursor.getColumnIndex(FollowDatabase.DETAIL_TIME));
+
+            int count = cursor.getCount();
+
+            for (int i = 0; i < count; i++)
+            {
+                String phone = cursor.getString(cursor.getColumnIndex(FollowDatabase.DETAIL_PHONE));
+
+                String number = cursor.getString(cursor.getColumnIndex(FollowDatabase.DETAIL_NUMBER));
+                String type = cursor.getString(cursor.getColumnIndex(FollowDatabase.DETAIL_TYPE));
+                String price = cursor.getString(cursor.getColumnIndex(FollowDatabase.DETAIL_PRICE));
+                String unit = cursor.getString(cursor.getColumnIndex(FollowDatabase.DETAIL_UNIT));
+                String time = cursor.getString(cursor.getColumnIndex(FollowDatabase.DETAIL_TIME));
+                String messageType = cursor.getString(cursor.getColumnIndex(FollowDatabase.DETAIL_MESSAGE_TYPE));
+
+                boolean changePhone = !oldPhone.equals(phone);
+                boolean changeTime = !oldTime.equals(time);
+
+                if (i == 0 || changePhone)
+                {
+                    MessageDBHelper.removeAllWinnumber(phone, time);
+                }
+
+                if (i == 0 || changePhone || changeTime)
+                {
+                    calculateResult.setPhone(phone);
+
+                    oldPhone = phone;
+                    oldTime = time;
+                }
+
+                boolean isLastNumberOfPhone;
+
+                if (i == (count - 1))
+                {
+                    isLastNumberOfPhone = true;
+                }
+                else
+                {
+                    cursor.moveToPosition(i + 1);
+
+                    String nextPhone = cursor.getString(cursor.getColumnIndex(FollowDatabase.DETAIL_PHONE));
+
+                    String nextMessageType = cursor.getString(cursor.getColumnIndex(FollowDatabase.DETAIL_MESSAGE_TYPE));
+
+                    String nextTime = cursor.getString(cursor.getColumnIndex(FollowDatabase.DETAIL_TIME));
+
+                    isLastNumberOfPhone = !nextPhone.equals(phone) || !nextMessageType.equals(messageType) || !nextTime.equals(time);
+
+                    cursor.moveToPosition(i);
+                }
+
+                calculateResult.calculateNumber(number, type, price, unit, time, TypeMessage.convert(messageType), isLastNumberOfPhone);
+
+                int percent = (int) ((((double) i) / ((double) count)) * 100d);
+
+                publishProgress(percent);
+
+                cursor.moveToNext();
+            }
+
+            cursor.close();
+        }
+
+        @Override
+        protected void onProgressUpdate(Integer... values) {
+            super.onProgressUpdate(values);
+
+            progressDialog.setProgress(values[0]);
+        }
+
+        @Override
+        protected void onPostExecute(String result) {
+            Log.d("TaskHelper", "TaskLoadResultNumber: isCancelled: " + this.isCancelled() + " ,Status: " + this.getStatus());
+
+            progressDialog.dismiss();
+
+            CommonTask.AsyncSingleThread.get().execute(new Runnable() {
+                @Override
+                public void run() {
+                    if (phone == null)
+                    {
+                        calculate();
+                    }
+                    else
+                    {
+                        String name = ContactDBHelper.getName(phone);
+                        calculateOnce(name, phone);
+                    }
+
+                    phone = null;
+
+                    if (context != null)
+                    {
+                        requestUpdate();
+                    }
+                }
+            }).clean();
+        }
+
+        private void calculate() {
+            Cursor cursor = FollowDBHelper.getAllPhoneKhach();
+
+            try {
+
+                if (cursor != null && cursor.moveToFirst())
+                {
+                    while (!cursor.isAfterLast())
+                    {
+                        String name = cursor.getString(cursor.getColumnIndex(FollowDatabase.DETAIL_NAME));
+                        String phone = cursor.getString(cursor.getColumnIndex(FollowDatabase.DETAIL_PHONE));
+
+                        calculateOnce(name, phone);
+
+                        cursor.moveToNext();
+                    }
+                }
+
+            } finally {
+                cursor.close();
+            }
+        }
+
+        public void calculateOnce(final String name, final String phone) {
+
+            Cursor cCal = FollowDBHelper.calculateCongno(phone);
+
+            try {
+
+                if (cCal != null && cCal.moveToFirst())
+                {
+                    while (!cCal.isAfterLast())
+                    {
+                        String type = cCal.getString(cCal.getColumnIndex(FollowDatabase.DETAIL_PARENT_TYPE));
+
+                        double price = cCal.getDouble(cCal.getColumnIndex("sumprice"));
+                        double amountHit = cCal.getDouble(cCal.getColumnIndex("sumhit"));
+                        double pointWin = cCal.getDouble(cCal.getColumnIndex("sumpointwin"));
+                        double win = cCal.getDouble(cCal.getColumnIndex("sumwin"));
+
+                        CongnoModel model = new CongnoModel(
+                                name,
+                                phone,
+                                LotoType.valueOf(type),
+                                (int) price,
+                                (int) pointWin,
+                                Utils.getCurrentDate(),
+                                String.valueOf(win - amountHit)
+                        );
+
+                        CongnoDBHelper.insert(model);
+
+                        cCal.moveToNext();
+                    }
+                }
+
+            } finally {
+                cCal.close();
+            }
+        }
+
+        protected void requestUpdate() {
+            Intent intent = new Intent(Action.ACTION_REQUEST_UPDATE);
+            context.sendBroadcast(intent);
+        }
+    }
+}

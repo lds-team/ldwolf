@@ -1,0 +1,331 @@
+package bingo.com.screen.configscreen;
+
+import android.app.TimePickerDialog;
+import android.os.Bundle;
+import android.text.TextUtils;
+import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
+import android.widget.EditText;
+import android.widget.RadioGroup;
+import android.widget.TextView;
+import android.widget.TimePicker;
+
+import java.util.Calendar;
+
+import bingo.com.R;
+import bingo.com.async.CommonTask;
+import bingo.com.base.Basev4Fragment;
+import bingo.com.utils.Utils;
+import butterknife.Bind;
+import butterknife.OnCheckedChanged;
+import butterknife.OnClick;
+import butterknife.OnTextChanged;
+
+/**
+ * Created by kazinguyen on 6/17/17.
+ */
+public class ConfigFragment extends Basev4Fragment implements CompoundButton.OnCheckedChangeListener, View.OnClickListener {
+
+    public static final String TAG = "ConfigFragment";
+
+    @Bind(R.id.config_settings1)
+    ViewGroup settings_1;
+
+    @Bind(R.id.config_settings2)
+    RadioGroup settings_2;
+
+    @Bind(R.id.config_settings3)
+    RadioGroup settings_3;
+
+    @Bind(R.id.config_settings4)
+    RadioGroup settings_4;
+
+    @Bind(R.id.config_settings5)
+    ViewGroup settings_5;
+
+    @Bind(R.id.config_timereceived_loxien)
+    TextView timeLoXien;
+
+    @Bind(R.id.config_timereceived_de)
+    TextView timeDe;
+
+    @Bind(R.id.config_thuong3cang)
+    EditText thuongBaCang;
+
+    private int typeChotSoDu;
+
+    private int typeReplyMessage;
+
+    private int typeDeliverMessage;
+
+    private int countBaCangConfig;
+
+    private boolean isDeliverPoint;
+
+    private boolean isConfigBaCang;
+
+    String timeConfigLoXien;
+
+    String timeConfigDe;
+
+    @Override
+    public View onCreateFragmentView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        return inflater.inflate(R.layout.fragment_config, container, false);
+    }
+
+    @Override
+    public void onViewFragmentCreated(View view, Bundle savedInstanceState) {
+        loadingConfig(view);
+    }
+
+    private void loadingConfig(View view) {
+        timeConfigLoXien = SettingsHelper.getTimeReceiveLoXien(getSaved());
+        timeLoXien.setText(timeConfigLoXien);
+
+        timeConfigDe = SettingsHelper.getTimeReceiveDe(getSaved());
+        timeDe.setText(timeConfigDe);
+
+        //-----
+        typeChotSoDu = SettingsHelper.getChotSoDuConfig(getSaved());
+
+        if (typeChotSoDu == SettingsHelper.CHOT_SO_DU)
+            settings_4.check(R.id.config_chotsodu);
+
+        else
+            settings_4.check(R.id.config_chotsodumore);
+
+        //-----
+        typeReplyMessage = SettingsHelper.getReplyMessageConfig(getSaved());
+
+        if (typeReplyMessage == SettingsHelper.OK_TIN_VA_NOI_DUNG)
+            settings_3.check(R.id.config_ok_message_more);
+
+        else if (typeReplyMessage == SettingsHelper.OK_TIN)
+            settings_3.check(R.id.config_ok_message);
+
+        else if (typeReplyMessage == SettingsHelper.KHONG_GUI)
+            settings_3.check(R.id.config_not_send);
+
+        else
+            settings_3.check(R.id.config_forward_message);
+
+        //-----
+        typeDeliverMessage = SettingsHelper.getDeliveryConfig(getSaved());
+
+        if (typeDeliverMessage == SettingsHelper.DELIVER_LONG_MESSAGE)
+            settings_2.check(R.id.config_long_message);
+
+        else if (typeDeliverMessage == SettingsHelper.DELIVER_MESSAGE_160)
+            settings_2.check(R.id.config_message_160);
+
+        else if (typeDeliverMessage == SettingsHelper.DELIVER_MESSAGE_320)
+            settings_2.check(R.id.config_message_320);
+
+        else
+            settings_2.check(R.id.config_message_480);
+
+        //-----
+        isDeliverPoint = SettingsHelper.getPointDeliverConfig(getSaved());
+
+        ((CheckBox) view.findViewById(R.id.config_deliver_point)).setChecked(isDeliverPoint);
+
+
+        countBaCangConfig = SettingsHelper.get3CangConfig(getSaved());
+
+        if (countBaCangConfig == 0)
+        {
+            ((CheckBox) view.findViewById(R.id.config_bacang)).setChecked(false);
+            thuongBaCang.clearComposingText();
+        }
+        else
+        {
+            ((CheckBox) view.findViewById(R.id.config_bacang)).setChecked(true);
+            thuongBaCang.setText(String.valueOf(countBaCangConfig));
+        }
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+
+        /*new CommonTask.ThreadTask(new Runnable() {
+            @Override
+            public void run() {
+                saveConfig();
+            }
+        }).start();*/
+    }
+
+    @OnCheckedChanged({R.id.config_switch1, R.id.config_switch2, R.id.config_switch3, R.id.config_switch4, R.id.config_switch5, R.id.config_bacang, R.id.config_deliver_point})
+    @Override
+    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+        Log.d(TAG, "handleChecked");
+
+        switch (buttonView.getId())
+        {
+            case R.id.config_switch1:
+                toggleButton(settings_1, isChecked);
+                break;
+
+            case R.id.config_switch2:
+                toggleButton(settings_2, isChecked);
+                break;
+
+            case R.id.config_switch3:
+                toggleButton(settings_3, isChecked);
+                break;
+
+            case R.id.config_switch4:
+                toggleButton(settings_4, isChecked);
+                break;
+
+            case R.id.config_switch5:
+                toggleButton(settings_5, isChecked);
+                break;
+
+            case R.id.config_bacang:
+                isConfigBaCang = isChecked;
+                break;
+
+            case R.id.config_deliver_point:
+                isDeliverPoint = isChecked;
+                break;
+
+            default:break;
+        }
+    }
+
+    @OnClick({R.id.config_chotsodu, R.id.config_chotsodumore, R.id.config_ok_message_more, R.id.config_ok_message, R.id.config_not_send, R.id.config_forward_message,
+    R.id.config_long_message, R.id.config_message_160, R.id.config_message_320, R.id.config_message_480})
+    @Override
+    public void onClick(View v) {
+        switch (v.getId())
+        {
+            case R.id.config_chotsodu:
+                typeChotSoDu = SettingsHelper.CHOT_SO_DU;
+                break;
+
+            case R.id.config_chotsodumore:
+                typeChotSoDu = SettingsHelper.CHOT_SO_DU_VA_CONG_NO_CU;
+                break;
+
+            //----
+
+            case R.id.config_ok_message_more:
+                typeReplyMessage = SettingsHelper.OK_TIN_VA_NOI_DUNG;
+                break;
+
+            case R.id.config_ok_message:
+                typeReplyMessage = SettingsHelper.OK_TIN;
+                break;
+
+            case R.id.config_not_send:
+                typeReplyMessage = SettingsHelper.KHONG_GUI;
+                break;
+
+            case R.id.config_forward_message:
+                typeReplyMessage = SettingsHelper.OK_TIN_DA_NHAN;
+                break;
+
+            //-----
+
+            case R.id.config_long_message:
+                typeDeliverMessage = SettingsHelper.DELIVER_LONG_MESSAGE;
+                break;
+
+            case R.id.config_message_160:
+                typeDeliverMessage = SettingsHelper.DELIVER_MESSAGE_160;
+                break;
+
+            case R.id.config_message_320:
+                typeDeliverMessage = SettingsHelper.DELIVER_MESSAGE_320;
+                break;
+
+            case R.id.config_message_480:
+                typeDeliverMessage = SettingsHelper.DELIVER_MESSAGE_480;
+                break;
+
+            default:break;
+        }
+
+        new CommonTask.ThreadTask(new Runnable() {
+            @Override
+            public void run() {
+                saveSwitchConfig();
+            }
+        }).start();
+    }
+
+    @OnTextChanged(R.id.config_thuong3cang)
+    public void onChangeBaCangConfig() {
+        if (!TextUtils.isEmpty(thuongBaCang.getText().toString()))
+            countBaCangConfig = Integer.parseInt(thuongBaCang.getText().toString());
+    }
+
+    private void toggleButton(ViewGroup vg, boolean show) {
+        vg.setVisibility(show ? View.VISIBLE : View.GONE);
+    }
+
+    @OnClick(R.id.config_timereceived_loxien)
+    public void changeTimeLoXien() {
+        showPicker(true);
+    }
+
+    @OnClick(R.id.config_timereceived_de)
+    public void changeTimeDe() {
+        showPicker(false);
+    }
+
+    private void showPicker(final boolean isLoXien) {
+        Calendar calendar = Calendar.getInstance();
+
+        TimePickerDialog dialog = new TimePickerDialog(getActivity(), new TimePickerDialog.OnTimeSetListener() {
+            @Override
+            public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
+
+                setTextTime(isLoXien, Utils.getTimeFrom(hourOfDay, minute));
+            }
+        }, calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE), true);
+
+        dialog.show();
+
+        calendar.clear();
+    }
+
+    private void setTextTime(boolean isLoXien, String textTime) {
+        if (isLoXien)
+        {
+            timeLoXien.setText(textTime);
+            this.timeConfigLoXien = textTime;
+            SettingsHelper.saveTimeReceiveLoXien(getSaved(), timeConfigLoXien);
+        }
+        else
+        {
+            timeDe.setText(textTime);
+            this.timeConfigDe = textTime;
+            SettingsHelper.saveTimeReceiveDe(getSaved(), timeConfigDe);
+        }
+    }
+
+    public void saveSwitchConfig() {
+        SettingsHelper.saveChotSoDuConfig(getSaved(), typeChotSoDu);
+
+        SettingsHelper.saveReplyMessageConfig(getSaved(), typeReplyMessage);
+
+        SettingsHelper.saveDeliveryConfig(getSaved(), typeDeliverMessage);
+
+        SettingsHelper.savePointDeliverConfig(getSaved(), isDeliverPoint);
+
+        if (isConfigBaCang)
+            SettingsHelper.save3CangConfig(getSaved(), countBaCangConfig);
+    }
+
+    @Override
+    public void update() {
+
+    }
+}

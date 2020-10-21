@@ -1,0 +1,317 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:animateLayoutChanges="true"
+        android:orientation="vertical">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="gone">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="5dp"
+                android:text="Cài đặt 3 càng, xiên: "
+                android:textStyle="bold" />
+
+            <Switch
+                android:id="@+id/config_switch1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:checked="false"
+                android:padding="5dp" />
+        </RelativeLayout>
+
+        <LinearLayout
+            android:id="@+id/config_settings1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:visibility="gone">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="5dp"
+                android:text="- Trả thưởng 3 càng"
+                android:textColor="@android:color/holo_red_dark" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <CheckBox
+                    android:id="@+id/config_bacang"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:gravity="center_vertical"
+                    android:maxLines="2"
+                    android:text="3 càng ăn áp mạn:\n(khác càng và trùng đề)" />
+
+                <EditText
+                    android:id="@+id/config_thuong3cang"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:cursorVisible="true"
+                    android:gravity="right"
+                    android:inputType="number"
+                    android:minWidth="100dp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:text="lần" />
+            </LinearLayout>
+
+            <CheckBox
+                android:id="@+id/config_deliver_point"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Chuyển đi theo điểm" />
+        </LinearLayout>
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="5dp"
+                android:text="Cài đặt tin nhắn chuyển đi: "
+                android:textStyle="bold" />
+
+            <Switch
+                android:id="@+id/config_switch2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:checked="false"
+                android:padding="5dp" />
+        </RelativeLayout>
+
+        <RadioGroup
+            android:id="@+id/config_settings2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="gone">
+
+            <RadioButton
+                android:id="@+id/config_long_message"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Chuyển tin nhắn dài" />
+
+            <RadioButton
+                android:id="@+id/config_message_160"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Các tin nhắn 160 ký tự/ tin" />
+
+            <RadioButton
+                android:id="@+id/config_message_320"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Các tin nhắn 320 ký tự/ tin" />
+
+            <RadioButton
+                android:id="@+id/config_message_480"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Các tin nhắn 480 ký tự/ tin" />
+        </RadioGroup>
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="5dp"
+                android:text="Cài đặt trả lời tin nhắn: "
+                android:textStyle="bold" />
+
+            <Switch
+                android:id="@+id/config_switch3"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:checked="false"
+                android:padding="5dp" />
+        </RelativeLayout>
+
+        <RadioGroup
+            android:id="@+id/config_settings3"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="gone">
+
+            <RadioButton
+                android:id="@+id/config_ok_message_more"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="OK tin và nội dung phân tích" />
+
+            <RadioButton
+                android:id="@+id/config_ok_message"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Chỉ OK tin" />
+
+            <RadioButton
+                android:id="@+id/config_not_send"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Không gửi tin nhắn" />
+
+            <RadioButton
+                android:id="@+id/config_forward_message"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="OK tin đã nhận (nguyên mẫu)" />
+        </RadioGroup>
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="5dp"
+                android:text="Cài đặt nhắn chốt số dư: "
+                android:textStyle="bold" />
+
+            <Switch
+                android:id="@+id/config_switch4"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:checked="false"
+                android:padding="5dp" />
+        </RelativeLayout>
+
+        <RadioGroup
+            android:id="@+id/config_settings4"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="gone">
+
+            <RadioButton
+                android:id="@+id/config_chotsodu"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Chốt số dư trong ngày" />
+
+            <RadioButton
+                android:id="@+id/config_chotsodumore"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Chốt số dư + Công nợ cũ" />
+        </RadioGroup>
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="gone">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="5dp"
+                android:text="Cài đặt thời gian nhận tin: "
+                android:textStyle="bold" />
+
+            <Switch
+                android:id="@+id/config_switch5"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:checked="false"
+                android:padding="5dp" />
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:id="@+id/config_settings5"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="gone">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentStart="true"
+                android:layout_toStartOf="@+id/config_timereceived_loxien"
+                android:maxLines="1"
+                android:padding="5dp"
+                android:text="Không nhận lô, xiên sau: " />
+
+            <TextView
+                android:id="@+id/config_timereceived_loxien"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:layout_marginEnd="150dp"
+                android:background="@drawable/button_bg_normal"
+                android:padding="5dp"
+                android:text="18:32"
+                android:textColor="@android:color/black" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignBaseline="@+id/config_timereceived_de"
+                android:layout_alignParentStart="true"
+                android:layout_toStartOf="@+id/config_timereceived_de"
+                android:maxLines="1"
+                android:padding="5dp"
+                android:text="Không nhận đề muộn quá: " />
+
+            <TextView
+                android:id="@+id/config_timereceived_de"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:layout_below="@+id/config_timereceived_loxien"
+                android:layout_marginEnd="150dp"
+                android:layout_marginTop="5dp"
+                android:background="@drawable/button_bg_normal"
+                android:padding="5dp"
+                android:text="18:32"
+                android:textColor="@android:color/black" />
+        </RelativeLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="5dp"
+                android:text="Nhận tin nhắn trùng: "
+                android:textStyle="bold" />
+
+            <CheckBox
+                android:id="@+id/config_acceptdup"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="10dp" />
+        </LinearLayout>
+    </LinearLayout>
+</ScrollView>

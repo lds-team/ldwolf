@@ -1,0 +1,712 @@
+package bingo.com.helperdb.db;
+
+import android.content.ContentValues;
+import android.content.Context;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteOpenHelper;
+import android.net.Uri;
+import android.text.TextUtils;
+
+import java.util.Calendar;
+
+import bingo.com.enumtype.TypeMessage;
+import bingo.com.helperdb.SMSHelper;
+import bingo.com.model.ChooseMessage;
+import bingo.com.utils.Constant;
+import bingo.com.utils.LoaderSQLite;
+import bingo.com.utils.Utils;
+
+/**
+ * Created by kazinguyen on 6/19/17.
+ */
+public class MessageDatabase extends SQLiteOpenHelper {
+
+    private static final String DB_NAME = "messagedatabase";
+    private static final String TABLE_NAME = "message";
+
+    private static final String KEY_ID = "_id";
+    public static final String NAME = "name";
+    public static final String PHONE = "phone";
+    private static final String MESSAGE_ID = "messageid";
+    private static final String THREAD = "thread";
+    public static final String CONTENT = "content";
+    public static final String RAW_CONTENT = "rawcontent";
+    public static final String ANALYZE_CONTENT = "analyzecontent";
+    public static final String WIN_NUMBER = "winnumber";
+    public static final String ERROR = "error";
+    public static final String TIME = "time";
+    public static final String DATE = "date";
+    public static final String TYPE = "type";
+    public static final String VISIBLE = "visible";
+    public static final String HAS_ANALYZE = "analyze";
+    public static final String HAS_RESPONSE = "response";
+
+    public Context context;
+
+    String CREATE_MESSAGE_TABLE = "CREATE TABLE "
+            + TABLE_NAME + "("
+            + KEY_ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
+            + NAME + " TEXT, "
+            + PHONE + " TEXT,"
+            + MESSAGE_ID + " TEXT,"
+            + THREAD + " TEXT,"
+            + CONTENT + " TEXT,"
+            + RAW_CONTENT + " TEXT,"
+            + ANALYZE_CONTENT + " TEXT,"
+            + WIN_NUMBER + " TEXT,"
+            + ERROR + " TEXT,"
+            + TIME + " TEXT,"
+            + DATE + " TEXT,"
+            + TYPE + " TEXT,"
+            + VISIBLE + " TEXT,"
+            + HAS_ANALYZE + " TEXT,"
+            + HAS_RESPONSE + " TEXT" + ")";
+
+    public MessageDatabase(Context context) {
+        super(context, DB_NAME, null, 1);
+
+        this.context = context;
+    }
+
+    @Override
+    public void onCreate(SQLiteDatabase db) {
+        db.execSQL(CREATE_MESSAGE_TABLE);
+
+        setWriteAheadLoggingEnabled(true);
+    }
+
+    @Override
+    public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+        // Drop older table if existed
+        db.execSQL("DROP TABLE IF EXISTS " + TABLE_NAME);
+
+        // Create tables again
+        onCreate(db);
+    }
+
+    public void addMessageSent(ChooseMessage item) {
+        SQLiteDatabase db = getWritableDatabase();
+
+        try {
+            db.beginTransaction();
+
+            ContentValues values = new ContentValues();
+
+            values.put(NAME, LoaderSQLite.getContactName(context, item.getPhone(), Utils.fixPhone(item.getPhone())));
+            values.put(PHONE, Utils.fixPhone(item.getPhone()));
+            values.put(CONTENT, item.getRawContent());
+            values.put(RAW_CONTENT, item.getRawContent());
+            values.put(ANALYZE_CONTENT, "");
+            values.put(WIN_NUMBER, "");
+            values.put(ERROR, "");
+            values.put(TIME, item.getTime());
+            values.put(DATE, convertDate(item.getTime()));
+            values.put(TYPE, item.getType());
+            values.put(VISIBLE, "1");
+            values.put(HAS_ANALYZE, "1");
+            values.put(HAS_RESPONSE, "1");
+
+            Cursor cursor = db.query(TABLE_NAME, null, TYPE + "=? AND " + PHONE + " =? AND " + TIME + " =?",
+                    new String[]{values.getAsString(TYPE), values.getAsString(PHONE), values.getAsString(TIME)}, null, null, null, null);
+
+            if (cursor == null || cursor.getCount() == 0)
+            {
+                db.insert(TABLE_NAME, null, values);
+            }
+            else
+            {
+                int rowId = db.update(TABLE_NAME, values, TYPE + "=? AND " + PHONE + " =? ",
+                        new String[]{values.getAsString(TYPE), values.getAsString(PHONE)});
+            }
+
+            cursor.close();
+
+            db.setTransactionSuccessful();
+        } finally {
+            db.endTransaction();
+        }
+    }
+
+    public void addMessage(ChooseMessage item) {
+        SQLiteDatabase db = getWritableDatabase();
+
+        try {
+            db.beginTransaction();
+
+            ContentValues values = new ContentValues();
+
+            values.put(NAME, item.getName());
+            values.put(PHONE, Utils.fixPhone(item.getPhone()));
+            values.put(CONTENT, item.getRawContent());
+            values.put(RAW_CONTENT, item.getRawContent());
+            values.put(ANALYZE_CONTENT, "");
+            values.put(WIN_NUMBER, "");
+            values.put(ERROR, "");
+            values.put(TIME, item.getTime());
+            values.put(DATE, convertDate(item.getTime()));
+            values.put(TYPE, item.getType());
+            values.put(VISIBLE, "1");
+            values.put(HAS_ANALYZE, "0");
+            values.put(HAS_RESPONSE, "0");
+
+            updateIfNeed(db, values);
+
+            db.setTransactionSuccessful();
+        } finally {
+            db.endTransaction();
+        }
+    }
+
+    public void updateIfNeed(SQLiteDatabase db, ContentValues values) {
+        Cursor cursor = db.query(TABLE_NAME, null, TIME + "=? AND " + PHONE + " =? ",
+                new String[]{values.getAsString(TIME), values.getAsString(PHONE)}, null, null, null, null);
+
+        if (cursor == null || cursor.getCount() == 0)
+        {
+            db.insert(TABLE_NAME, null, values);
+        }
+        else
+        {
+            //Not update Message has analyze.
+            values.remove(HAS_ANALYZE);
+
+            values.remove(HAS_RESPONSE);
+
+            //Not Update Content Editted.
+            values.remove(CONTENT);
+
+            //Not update visible.
+            values.remove(VISIBLE);
+
+            //RemoveError.
+            values.remove(ERROR);
+
+            //Update Row.
+            cursor.moveToFirst();
+
+            int rowId = db.update(TABLE_NAME, values, TIME + "=? AND " + PHONE + " =? ",
+                    new String[]{values.getAsString(TIME), values.getAsString(PHONE)});
+        }
+
+        cursor.close();
+    }
+
+    @Deprecated
+    @SuppressWarnings("Just use for reload message")
+    public void loadMessage(String phone, TypeMessage type, long timeEnd) {
+
+        Uri uri = null;
+
+        if (type == TypeMessage.RECEIVED)
+        {
+            uri = SMSHelper.RECEIVED_MESSAGE_CONTENT_PROVIDER;
+        }
+        else if (type == TypeMessage.SENT)
+        {
+            uri = SMSHelper.SENT_MESSAGE_CONTENT_PROVIDER;
+        }
+
+
+        if (uri == null)
+        {
+            insertDb(phone, TypeMessage.RECEIVED, timeEnd, SMSHelper.RECEIVED_MESSAGE_CONTENT_PROVIDER);
+            insertDb(phone, TypeMessage.SENT, timeEnd, SMSHelper.SENT_MESSAGE_CONTENT_PROVIDER);
+        }
+        else
+        {
+            insertDb(phone, type, timeEnd, uri);
+        }
+    }
+
+    @Deprecated
+    private void insertDb(String phone, TypeMessage type, long timeEnd, Uri uri) {
+
+        String[] time = getStartAndEndTime(timeEnd, false);
+
+        String phone2 = "";
+
+        if (phone.startsWith("0"))
+            phone2 = phone.replaceFirst("0", "+84");
+        if (phone.startsWith("+84"))
+            phone2 = phone.replaceFirst("\\+84", "0");
+
+        String[] reqCols = new String[] { "_id", "thread_id", "address", "body", "date", "person" };
+        Cursor c = this.context.getContentResolver().query(uri, null, "date >=? AND date <=? AND (address =? OR address =?)" , new String[]{time[0], time[1], phone, phone2}, null);
+
+
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        try {
+            db.beginTransaction();
+
+            if (c.moveToFirst()) {
+
+                while (!c.isAfterLast()) {
+
+                    ContentValues values = new ContentValues();
+
+                    values.put(MESSAGE_ID, c.getString(c.getColumnIndex("_id")));
+                    values.put(THREAD, c.getString(c.getColumnIndex("thread_id")));
+
+                    String address = c.getString(c.getColumnIndex("address"));
+
+                    values.put(NAME, LoaderSQLite.getContactName(context, address, Utils.fixPhone(address)));
+                    values.put(PHONE, Utils.fixPhone(address));
+                    values.put(CONTENT, c.getString(c.getColumnIndex("body")));
+                    values.put(RAW_CONTENT, c.getString(c.getColumnIndex("body")));
+                    values.put(ANALYZE_CONTENT, "");
+                    values.put(WIN_NUMBER, "");
+                    values.put(ERROR, "");
+                    values.put(TIME, c.getString(c.getColumnIndex("date")));
+                    values.put(DATE, convertDate(c.getString(c.getColumnIndex("date"))));
+                    values.put(TYPE, type.name());
+                    values.put(VISIBLE, "1");
+                    values.put(HAS_ANALYZE, "0");
+                    values.put(HAS_RESPONSE, "1");
+
+                    updateIfNeed(db, values);
+
+                    c.moveToNext();
+                }
+            }
+
+            c.close();
+
+            db.setTransactionSuccessful();
+        } finally {
+            db.endTransaction();
+        }
+    }
+
+    public Cursor getMessageByPhone(String phone, TypeMessage type, String date) {
+
+        String arg1 = null;
+        String arg2 = null;
+
+        if (type == TypeMessage.SMS)
+        {
+            arg1 = TypeMessage.RECEIVED.name();
+            arg2 = TypeMessage.SENT.name();
+        }
+        else
+        {
+            arg1 = arg2 = type.name();
+        }
+
+        SQLiteDatabase db = this.getReadableDatabase();
+        try {
+            db.beginTransaction();
+
+            Cursor cursor = db.query(TABLE_NAME, null, PHONE + " =? AND " + DATE + " =? AND " + "(" + TYPE + " =? OR " + TYPE + " =?) ", new String[]{phone, date, arg1, arg2}, null, null, TIME + " DESC");
+
+            db.setTransactionSuccessful();
+
+            return cursor;
+        } finally {
+            db.endTransaction();
+        }
+    }
+
+    public Cursor getMessageByPhone(String phone, TypeMessage type, long timeinDay, boolean isTimeEnd) {
+
+        String[] time = getStartAndEndTime(timeinDay, isTimeEnd);
+
+        String arg1 = null;
+        String arg2 = null;
+
+        if (type == TypeMessage.SMS)
+        {
+            arg1 = TypeMessage.RECEIVED.name();
+            arg2 = TypeMessage.SENT.name();
+        }
+        else
+        {
+            arg1 = arg2 = type.name();
+        }
+
+        SQLiteDatabase db = this.getReadableDatabase();
+        try {
+            db.beginTransaction();
+
+            Cursor cursor = db.query(TABLE_NAME, null, PHONE + " =? AND " + TIME + " >=? AND " + TIME + " <=? AND " + "(" + TYPE + " =? OR " + TYPE + " =?) " + " AND " + HAS_ANALYZE + " =?", new String[]{phone, time[0], time[1], arg1, arg2, "1"}, null, null, TIME + " ASC");
+
+            db.setTransactionSuccessful();
+
+            return cursor;
+        } finally {
+            db.endTransaction();
+        }
+    }
+
+    private String[] getStartAndEndTime(long timeinDay) {
+
+        return getStartAndEndTime(timeinDay, false);
+    }
+
+    private String[] getStartAndEndTime(long timeinDay, boolean isTimeEnd) {
+
+        Calendar calendar = Calendar.getInstance();
+
+        if (timeinDay != 0)
+        {
+            calendar.setTimeInMillis(timeinDay);
+
+            if (!isTimeEnd)
+            {
+                calendar.set(Calendar.HOUR_OF_DAY, 23);
+                calendar.set(Calendar.MINUTE, 59);
+                calendar.set(Calendar.SECOND, 59);
+            }
+        }
+        else
+        {
+            calendar.setTimeInMillis(Utils.convertLongTime(Utils.getCurrentDate()));
+
+            calendar.set(Calendar.HOUR_OF_DAY, 23);
+            calendar.set(Calendar.MINUTE, 59);
+            calendar.set(Calendar.SECOND, 59);
+        }
+
+        String endDate = String.valueOf(calendar.getTimeInMillis());
+
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        String startDate = String.valueOf(calendar.getTimeInMillis());
+
+        return new String[]{startDate, endDate};
+    }
+
+    public String convertDate(String dateInMilliseconds) {
+
+        return Utils.convertDate(dateInMilliseconds);
+    }
+
+    public int updateSingleMessageAnalyze(boolean hasAnalyze, String phone, String time) {
+
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        try {
+
+            db.beginTransaction();
+
+            ContentValues values = new ContentValues();
+            values.put(HAS_ANALYZE, hasAnalyze ? "1" : "0");
+
+            int row = db.update(TABLE_NAME, values, PHONE + " =? AND " + TIME + " =?", new String[]{phone, time});
+
+            db.setTransactionSuccessful();
+
+            return row;
+        } finally {
+            db.endTransaction();
+        }
+
+    }
+
+    public void updateAllAnalyzeStatus(boolean hasAnalyze) {
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        String[] time = getStartAndEndTime(0);
+
+        ContentValues values = new ContentValues();
+        values.put(HAS_ANALYZE, hasAnalyze ? "1" : "0");
+
+        db.update(TABLE_NAME, values, DATE + " =?", new String[]{Utils.getCurrentDate()});
+    }
+
+    public Cursor getCursorStattisticNoAnalyze(String keyNameOrPhone){
+
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        Cursor cursor = db.query(TABLE_NAME,
+                null,
+                DATE + "=? AND " + HAS_ANALYZE + "=? AND " +
+                        "(" + NAME + " LIKE ? OR " + PHONE + " LIKE ?)",
+                new String[]{Utils.getCurrentDate(), "0","%" + keyNameOrPhone + "%", "%" + keyNameOrPhone + "%"},
+                null, null, TIME + " ASC");
+
+        return cursor;
+    }
+
+    public Cursor getCursorStattisticNoAnalyze(){
+
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        Cursor cursor = db.query(TABLE_NAME,
+                null,
+                DATE + "=? AND " + HAS_ANALYZE + "=? ",
+                new String[]{Utils.getCurrentDate(), "0"},
+                null, null, TIME + " ASC");
+
+        return cursor;
+    }
+
+    public void updateError(String phone, String time, String error) {
+
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        ContentValues values = new ContentValues();
+        values.put(ERROR, error);
+
+        if (!TextUtils.isEmpty(error))
+            values.put(HAS_ANALYZE, "0");
+
+        db.update(TABLE_NAME, values, TIME + " =? AND " + PHONE + " =?", new String[]{time, phone});
+    }
+
+    public int updateContentNornal(String phone, String time, String content) {
+
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        ContentValues values = new ContentValues();
+        values.put(CONTENT, content);
+        values.put(HAS_ANALYZE, "0");
+
+        return db.update(TABLE_NAME, values, TIME + " =? AND " + PHONE + " =?", new String[]{time, phone});
+    }
+
+    public int updateContentEditted(String phone, String time, String content) {
+
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        ContentValues values = new ContentValues();
+        values.put(CONTENT, content);
+        values.put(HAS_ANALYZE, "0");
+        values.put(TIME, String.valueOf(Long.parseLong(time) + 1));
+
+        return db.update(TABLE_NAME, values, TIME + " =? AND " + PHONE + " =?", new String[]{time, phone});
+    }
+
+    public void deleteMessageByDay(String phone, String date) {
+
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        db.delete(TABLE_NAME, DATE + " =? AND " + PHONE + " =?", new String[]{date, phone});
+    }
+
+    public void deleteMessage(String phone, String time) {
+
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        db.delete(TABLE_NAME, TIME + " =? AND " + PHONE + " =?", new String[]{time, phone});
+    }
+
+    public void deleteAlls() {
+        SQLiteDatabase db = getWritableDatabase();
+
+        db.delete(TABLE_NAME, null, null);
+    }
+
+    public void deleteDataUser(String phone) {
+        SQLiteDatabase db = getWritableDatabase();
+
+        db.delete(TABLE_NAME, PHONE + " =?", new String[]{phone});
+    }
+
+    public void addFromTemple(String name, String phone, String content, String error, String time, String date, String type) {
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        ContentValues values = new ContentValues();
+        values.put(NAME, name);
+        values.put(PHONE, Utils.fixPhone(phone));
+        values.put(CONTENT, content);
+        values.put(RAW_CONTENT, content);
+        values.put(ANALYZE_CONTENT, "");
+        values.put(WIN_NUMBER, "");
+        values.put(ERROR, error);
+        values.put(TIME, time);
+        values.put(DATE, date);
+        values.put(TYPE, type);
+        values.put(VISIBLE, "1");
+        values.put(HAS_ANALYZE, "0");
+        values.put(HAS_RESPONSE, "0");
+
+        db.insert(TABLE_NAME, null, values);
+    }
+
+    public Cursor getAllMessage(String phone) {
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        try {
+
+            db.beginTransaction();
+
+            Cursor cursor = db.query(TABLE_NAME, null, PHONE + " =? AND " + DATE + " =? ",
+                    new String[]{phone, Utils.getCurrentDate()}, null, null, null);
+
+            db.setTransactionSuccessful();
+
+            return cursor;
+        } finally {
+            db.endTransaction();
+        }
+    }
+
+    public boolean hasResponse(String phone, String time) {
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        boolean hasResponse = false;
+
+        try {
+
+            db.beginTransaction();
+
+            Cursor cursor = db.query(TABLE_NAME, null, PHONE + " =? AND " + TIME + " =? ",
+                    new String[]{phone, time}, null, null, null);
+
+            if (cursor != null && cursor.moveToFirst())
+            {
+                hasResponse = cursor.getString(cursor.getColumnIndex(HAS_RESPONSE)).equals("1");
+            }
+
+            cursor.close();
+
+            db.setTransactionSuccessful();
+
+            return hasResponse;
+        } finally {
+            db.endTransaction();
+        }
+    }
+
+    public int updateResponseStatus(String phone, String time, boolean hasResponse) {
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        ContentValues values = new ContentValues();
+        values.put(HAS_RESPONSE, hasResponse ? "1" : "0");
+
+        return db.update(TABLE_NAME, values, TIME + " =? AND " + PHONE + " =?", new String[]{time, phone});
+    }
+
+    public String getError(String phone, String time) {
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        String error = null;
+
+        try {
+
+            db.beginTransaction();
+
+            Cursor cursor = db.query(TABLE_NAME, null, PHONE + " =? AND " + TIME + " =? ",
+                    new String[]{phone, time}, null, null, null);
+
+            if (cursor != null && cursor.moveToFirst())
+            {
+                error = cursor.getString(cursor.getColumnIndex(ERROR));
+            }
+
+            cursor.close();
+
+            db.setTransactionSuccessful();
+
+            return error;
+        } finally {
+            db.endTransaction();
+        }
+    }
+
+    public int updateAnalyzeContent(String phone, String time, String analyzeContent) {
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        ContentValues values = new ContentValues();
+        values.put(ANALYZE_CONTENT, analyzeContent);
+
+        return db.update(TABLE_NAME, values, TIME + " =? AND " + PHONE + " =?", new String[]{time, phone});
+    }
+
+    public void updateWinNumber(String phone, String time, String numberWinSyntax) {
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        try {
+
+            db.beginTransaction();
+
+            Cursor cursor = db.query(TABLE_NAME, null, PHONE + " =? AND " + TIME + " =? ",
+                    new String[]{phone, time}, null, null, null);
+
+            String win;
+
+            if (cursor != null && cursor.moveToFirst())
+            {
+                win = cursor.getString(cursor.getColumnIndex(WIN_NUMBER));
+
+                /*win = (TextUtils.isEmpty(win) ? numberWinSyntax : win.concat(Constant.SEPARATE).concat(numberWinSyntax));*/
+
+                if (TextUtils.isEmpty(win))
+                {
+                    win = numberWinSyntax;
+                }
+                else
+                {
+                    if (!win.contains(numberWinSyntax))
+                    {
+                        win = win.concat(Constant.SEPARATE).concat(numberWinSyntax);
+                    }
+                }
+
+                ContentValues values = new ContentValues();
+                values.put(WIN_NUMBER, win);
+
+                db.update(TABLE_NAME, values, TIME + " =? AND " + PHONE + " =?", new String[]{time, phone});
+            }
+
+            cursor.close();
+
+            db.setTransactionSuccessful();
+
+        } finally {
+            db.endTransaction();
+        }
+    }
+
+    public void updateWinMessage(String phone, String time, String messageType, String numberWinSyntax) {
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        try {
+
+            db.beginTransaction();
+
+            Cursor cursor = db.query(TABLE_NAME, null, PHONE + " =? AND " + TIME + " =? AND " + TYPE + " =?",
+                    new String[]{phone, time, messageType}, null, null, null);
+
+            String win;
+
+            if (cursor != null && cursor.moveToFirst())
+            {
+                win = cursor.getString(cursor.getColumnIndex(ANALYZE_CONTENT));
+
+                if (TextUtils.isEmpty(win))
+                {
+                    win = numberWinSyntax;
+                }
+                else
+                {
+                    win = win.concat(numberWinSyntax);
+                }
+
+                ContentValues values = new ContentValues();
+                values.put(ANALYZE_CONTENT, win);
+
+                db.update(TABLE_NAME, values, TIME + " =? AND " + PHONE + " =? AND " + TYPE + " =?", new String[]{time, phone, messageType});
+            }
+
+            cursor.close();
+
+            db.setTransactionSuccessful();
+
+        } finally {
+            db.endTransaction();
+        }
+    }
+
+    public void removeAllWinNumber(String phone, String time) {
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        ContentValues values = new ContentValues();
+        values.put(/*WIN_NUMBER*/ANALYZE_CONTENT, "");
+
+        db.update(TABLE_NAME, values, /*TIME + " =? AND " + */PHONE + " =?", new String[]{/*time, */phone});
+    }
+}

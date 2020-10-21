@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="horizontal">
+
+    <bingo.com.customviews.TextViewDegit
+        android:id="@+id/resultview_text1"
+        style="@style/TextStyleCustomerTable"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:textAlignment="center" />
+
+    <bingo.com.customviews.TextViewDegit
+        android:id="@+id/resultview_text2"
+        style="@style/TextStyleCustomerTable"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:textAlignment="center" />
+
+    <bingo.com.customviews.TextViewDegit
+        android:id="@+id/resultview_text3"
+        style="@style/TextStyleCustomerTable"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:textAlignment="center" />
+
+    <bingo.com.customviews.TextViewDegit
+        android:id="@+id/resultview_text4"
+        style="@style/TextStyleCustomerTable"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1.5"
+        android:textAlignment="viewEnd" />
+
+    <bingo.com.customviews.TextViewDegit
+        android:id="@+id/resultview_text5"
+        style="@style/TextStyleCustomerTable"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1.5"
+        android:paddingRight="5dp"
+        android:textAlignment="viewEnd" />
+</LinearLayout>
